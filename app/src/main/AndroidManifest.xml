@@ -26,7 +26,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity" />
+        <activity android:name=".MainActivity"
+            android:theme="@style/AppTheme.Tab"/>
         <activity
             android:name=".SplashScreen"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -41,7 +42,15 @@
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_splash_screen" />
-        <activity android:name=".SignUp"></activity>
+        <activity android:name=".SignUp" />
+        <activity android:name=".Tabs.SearchTab" />
+        <activity android:name=".Tabs.HomeTab" />
+        <activity android:name=".Tabs.PictureTab" />
+        <activity android:name=".Tabs.ShowPictureOnMapTab" />
+        <activity android:name=".Tabs.ProfileTab"></activity>
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyBCuWAeJUnNPitsXxj5nVxsfbYoNuWhXww" />
     </application>
 
 </manifest>
