@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent" android:layout_height="match_parent">
+
+    <com.pkmmte.view.CircularImageView
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:id="@+id/userPic"
+        android:src="@mipmap/logo"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Large Text"
+        android:id="@+id/userName"
+        android:textStyle="bold|italic"
+        android:layout_alignTop="@+id/userPic"
+        android:layout_toEndOf="@+id/userPic"
+        android:layout_marginTop="12dp"
+        android:layout_marginLeft="10dp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/postPic"
+        android:layout_below="@+id/userPic"
+        android:src="@drawable/loading"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true" />
+
+    <ImageView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:id="@+id/likes"
+        android:layout_below="@+id/postPic"
+        android:layout_alignParentStart="true"
+        android:src="@drawable/heart_empty"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="250 likes"
+        android:id="@+id/nbr_likes"
+        android:layout_alignBottom="@+id/likes"
+        android:layout_toEndOf="@+id/likes"
+        android:layout_marginLeft="5dp"
+        android:layout_alignTop="@+id/likes" />
+</RelativeLayout>
