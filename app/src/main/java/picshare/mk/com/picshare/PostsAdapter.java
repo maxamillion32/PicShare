@@ -1,13 +1,24 @@
 package picshare.mk.com.picshare;
 
+import android.app.ActivityManager;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
+import com.nostra13.universalimageloader.cache.memory.impl.FIFOLimitedMemoryCache;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
+import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +33,8 @@ import picshare.mk.com.picshare.Utils.MyGpsLocationListener;
 public class PostsAdapter extends ArrayAdapter<Post> {
     MyGpsLocationListener gps;
     AppUtils appU;
+    private ImageLoader imageLoader;
+    private DisplayImageOptions options;
     public PostsAdapter(Context context, List<Post> Posts) {
         super(context, 0, Posts);
     }
@@ -55,9 +68,31 @@ public class PostsAdapter extends ArrayAdapter<Post> {
         }else{
             viewHolder.postLocation.setText("No Available location");
         }
+        initImageLoader();
+        imageLoader = ImageLoader.getInstance();
+        options = new DisplayImageOptions.Builder()
+                .showStubImage(R.drawable.loading)		//	Display Stub Image
+                .showImageForEmptyUri(R.drawable.loading)	//	If Empty image found
+                .cacheInMemory()
+                .cacheOnDisc().bitmapConfig(Bitmap.Config.RGB_565).build();
+        //Setting Images
+        if (post.getImageUrl() != null && !post.getImageUrl().equalsIgnoreCase("null")
+                && !post.getImageUrl().equalsIgnoreCase("")) {
+            imageLoader.displayImage(post.getImageUrl(), viewHolder.picture, options,
+                    new SimpleImageLoadingListener() {
+                        @Override
+                        public void onLoadingComplete(String imageUri,
+                                                      View view, Bitmap loadedImage) {
+                            super.onLoadingComplete(imageUri, view,
+                                    loadedImage);
+ }
+                    });
+        } else {
+            viewHolder.picture.setImageResource(R.drawable.loading);
+        }
+        //
         DownloadImg down = new DownloadImg();
         down.getImage((ImageView) convertView.findViewById(R.id.userPic), post.getUserAvatar());
-        down.getImage((ImageView) convertView.findViewById(R.id.postPic), post.getImageUrl());
         final TweetViewHolder finalViewHolder = viewHolder;
         final TweetViewHolder finalViewHolder1 = viewHolder;
         viewHolder.likesIcon.setOnClickListener(new View.OnClickListener() {
@@ -92,5 +127,28 @@ public class PostsAdapter extends ArrayAdapter<Post> {
         public ImageView picture;
         public ImageView likesIcon;
 
+    }
+    private void initImageLoader() {
+        int memoryCacheSize;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR) {
+            int memClass = ((ActivityManager)
+                    getContext().getSystemService(Context.ACTIVITY_SERVICE))
+                    .getMemoryClass();
+            memoryCacheSize = (memClass / 8) * 1024 * 1024;
+        } else {
+            memoryCacheSize = 2 * 1024 * 1024;
+        }
+
+        final ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
+                getContext()).threadPoolSize(5)
+                .threadPriority(Thread.NORM_PRIORITY - 2)
+                .memoryCacheSize(memoryCacheSize)
+                .memoryCache(new FIFOLimitedMemoryCache(memoryCacheSize-1000000))
+                .denyCacheImageMultipleSizesInMemory()
+                .discCacheFileNameGenerator(new Md5FileNameGenerator())
+                .tasksProcessingOrder(QueueProcessingType.LIFO).enableLogging()
+                .build();
+
+        ImageLoader.getInstance().init(config);
     }
 }

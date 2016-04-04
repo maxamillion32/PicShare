@@ -76,7 +76,7 @@ public class DownloadImg {
                 try {
                     url = new URL(picUrl);
                     image = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                    finalImage=image;// resize(image,800,450);
+                    finalImage=resize(image,500,400);
                     } catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
