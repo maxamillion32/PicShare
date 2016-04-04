@@ -9,15 +9,19 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.HashMap;
 import java.util.List;
 
+import picshare.mk.com.picshare.Utils.AppUtils;
 import picshare.mk.com.picshare.Utils.DownloadImg;
+import picshare.mk.com.picshare.Utils.MyGpsLocationListener;
 
 /**
  * Created by Malek on 4/4/2016.
  */
 public class PostsAdapter extends ArrayAdapter<Post> {
-
+    MyGpsLocationListener gps;
+    AppUtils appU;
     public PostsAdapter(Context context, List<Post> Posts) {
         super(context, 0, Posts);
     }
@@ -27,24 +31,30 @@ public class PostsAdapter extends ArrayAdapter<Post> {
         if(convertView == null){
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.posts_list_layout,parent, false);
         }
-
+        appU= new AppUtils();
         TweetViewHolder viewHolder = (TweetViewHolder) convertView.getTag();
         if(viewHolder == null){
             viewHolder = new TweetViewHolder();
             viewHolder.userName = (TextView) convertView.findViewById(R.id.userName);
             viewHolder.likes = (TextView) convertView.findViewById(R.id.nbr_likes);
+            viewHolder.postLocation = (TextView) convertView.findViewById(R.id.post_Location);
             viewHolder.avatar = (ImageView) convertView.findViewById(R.id.userPic);
             viewHolder.likesIcon = (ImageView) convertView.findViewById(R.id.likes);
             viewHolder.picture = (ImageView) convertView.findViewById(R.id.postPic);
             convertView.setTag(viewHolder);
         }
-
+        gps = new MyGpsLocationListener(getContext());
 
         Post post = getItem(position);
         viewHolder.userName.setText(post.getUserName());
         viewHolder.likes.setText(post.getLikes()+" Likes");
         nbrLikes[0] =Integer.parseInt(post.getLikes());
-
+        if (gps.canGetLocation()) {
+            HashMap<String,Double> coord = appU.getCoordonatesFromString(post.getLocation());
+            viewHolder.postLocation.setText(gps.getLocationName(coord.get("latitude"), coord.get("longitude")));
+        }else{
+            viewHolder.postLocation.setText("No Available location");
+        }
         DownloadImg down = new DownloadImg();
         down.getImage((ImageView) convertView.findViewById(R.id.userPic), post.getUserAvatar());
         down.getImage((ImageView) convertView.findViewById(R.id.postPic), post.getImageUrl());
@@ -77,6 +87,7 @@ public class PostsAdapter extends ArrayAdapter<Post> {
     private class TweetViewHolder{
         public TextView userName;
         public TextView likes;
+        public TextView postLocation;
         public ImageView avatar;
         public ImageView picture;
         public ImageView likesIcon;
