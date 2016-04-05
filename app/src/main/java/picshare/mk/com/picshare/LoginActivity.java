@@ -4,27 +4,25 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.LoaderManager.LoaderCallbacks;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
-
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -47,7 +45,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import picshare.mk.com.picshare.Utils.DataBaseConnector;
 import picshare.mk.com.picshare.Utils.JSONParser;
+import picshare.mk.com.picshare.Utils.SessionManager;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -201,7 +201,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-           // showProgress(true);
+            // showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
         }
@@ -316,10 +316,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         private final String mEmail;
         private final String mPassword;
         private ProgressDialog pdialog;
+
         UserLoginTask(String email, String password) {
             mEmail = email;
             mPassword = password;
         }
+
         @Override
         protected void onPreExecute() {
             // TODO Auto-generated method stub
@@ -328,6 +330,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             pdialog.show();
             super.onPreExecute();
         }
+
         @Override
         protected String doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
@@ -342,22 +345,27 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 JSONArray users = json.getJSONArray("User");
                 JSONObject user = users.getJSONObject(0);
                 String idStr = user.getString("user_id");
+                int id = user.getInt("user_id");
                 String firstName = user.getString("firstName");
                 String lastName = user.getString("lastName");
                 String email = user.getString("email");
                 String avatar = user.getString("avatar_url");
+                SessionManager session = new SessionManager(LoginActivity.this);
+                session.createLoginSession(idStr, email, firstName, lastName, avatar);
+                DataBaseConnector db = new DataBaseConnector(LoginActivity.this);
+                db.insertUser(id, email, firstName, lastName, avatar);
                 return "success";
             } catch (JSONException e) {
-                 return "fail";
+                return "fail";
             }
         }
 
         @Override
         protected void onPostExecute(final String success) {
             mAuthTask = null;
-           // showProgress(false);
+            // showProgress(false);
             pdialog.dismiss();
-            if (success== "success") {
+            if (success == "success") {
                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
 
             } else {
@@ -366,10 +374,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     Toast.makeText(LoginActivity.this, "Wrong Credentials", Toast.LENGTH_LONG).show();
 
                 }
-                if (isNetworkAvailable()){
+                if (isNetworkAvailable()) {
                     mPasswordView.setError(getString(R.string.error_incorrect_password));
                     mPasswordView.requestFocus();
-                }else{//No Internet Connection TODO Verify when to call it (onPostExecute in the AsynchTask)
+                } else {//No Internet Connection TODO Verify when to call it (onPostExecute in the AsynchTask)
                     final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
                     alertDialogBuilder.setMessage("Sorry There is no Internet Connection !! ");
                     alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -391,9 +399,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected void onCancelled() {
             mAuthTask = null;
-           // showProgress(false);
+            // showProgress(false);
         }
     }
+
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

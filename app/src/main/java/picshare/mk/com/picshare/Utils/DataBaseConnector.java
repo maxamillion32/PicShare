@@ -32,6 +32,11 @@ public class DataBaseConnector {
         db.close();
     }
 
+    public Boolean verifyTable() {
+        open();
+        return dbOpenHelper.verifyTable(db);
+    }
+
     public void insertUser(int id, String email, String name, String prename, String photoUrl) {
         ContentValues cv = new ContentValues();
         cv.put("_id", id);
