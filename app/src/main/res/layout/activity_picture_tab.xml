@@ -17,6 +17,6 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Picture"
-            android:id="@+id/textView" />
+            android:id="@+id/presure" />
     </RelativeLayout>
 </ScrollView>
