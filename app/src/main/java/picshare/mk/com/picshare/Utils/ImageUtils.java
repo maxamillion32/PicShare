@@ -1,5 +1,6 @@
 package picshare.mk.com.picshare.Utils;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -33,13 +34,13 @@ public class ImageUtils {
 
     private int PICK_IMAGE_REQUEST = 1;
 
-    private String UPLOAD_URL ="http://meetbuddies.net16.net/images/users/upload.php";
+    private String UPLOAD_URL ="http://picshare-android.esy.es/images/users/upload.php";
 
     private String KEY_IMAGE = "image";
     private String KEY_NAME = "name";
     public String name;
-    AppCompatActivity targetActivity;
-    public ImageUtils(String UPLOAD_URL, Bitmap bitmap, String name, AppCompatActivity c){
+    Activity targetActivity;
+    public ImageUtils(String UPLOAD_URL, Bitmap bitmap, String name, Activity c){
         this.UPLOAD_URL=UPLOAD_URL;
         this.bitmap=bitmap;
         this.name=name;
@@ -58,16 +59,18 @@ public class ImageUtils {
     }
     public void uploadImage(){
         //Showing the progress dialog
-        Bitmap imggBitmap=this.bitmap;
+        final Bitmap imggBitmap=this.bitmap;
+
         final String fileName=this.name;
         final ProgressDialog[] loading = {null};
+
         targetActivity.runOnUiThread(new Runnable() {
             public void run() {
                 loading[0] = ProgressDialog.show(targetActivity, "Uploading...", "Please wait...", false, false);
             }
         });
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, UPLOAD_URL,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, UPLOAD_URL,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(final String s) {
@@ -103,19 +106,14 @@ public class ImageUtils {
             protected Map<String, String> getParams() throws AuthFailureError {
                 //Converting Bitmap to String
 
-                String image = encodeTobase64(bitmap);//getStringImage(bitmap);
-
-                //Getting Image Name
-                String name= fileName;
-
+                String image = encodeTobase64(imggBitmap);//getStringImage(bitmap);
                 //Creating parameters
                 Map<String,String> params = new Hashtable<String, String>();
 
                 //Adding parameters
                 params.put(KEY_IMAGE, image);
-                params.put(KEY_NAME, name);
-
-                //returning parameters
+                params.put(KEY_NAME, fileName);
+                         //returning parameters
                 return params;
             }
         };
