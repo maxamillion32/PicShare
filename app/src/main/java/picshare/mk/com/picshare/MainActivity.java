@@ -113,7 +113,7 @@ public class MainActivity extends TabActivity implements SensorEventListener {
                     }
                 }
 
-            }  
+            }
             move=!move;
         }
     }
