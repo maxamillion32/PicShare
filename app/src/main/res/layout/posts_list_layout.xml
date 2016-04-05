@@ -66,11 +66,9 @@
         android:text="Medium Text"
         android:id="@+id/post_Location"
         android:layout_marginRight="10dp"
-        android:layout_alignBottom="@+id/imageView3"
-        android:layout_toEndOf="@+id/imageView3"
         android:layout_marginLeft="5dp"
-        android:layout_below="@+id/userName"
-        android:layout_marginBottom="0dp" />
+        android:layout_alignTop="@+id/imageView3"
+        android:layout_toEndOf="@+id/imageView3" />
 
     <ImageView
         android:layout_width="15dp"
