@@ -16,8 +16,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.MarkerOptions;
-
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
@@ -221,7 +219,7 @@ public class SearchTab extends AppCompatActivity {
             for (int i = 0; i < list.size(); i++) {
 
                 // Creating a marker
-                MarkerOptions markerOptions = new MarkerOptions();
+                // MarkerOptions markerOptions = new MarkerOptions();
 
                 // Getting a place from the places list
                 HashMap<String, String> hmPlace = list.get(i);
@@ -232,29 +230,28 @@ public class SearchTab extends AppCompatActivity {
                 // Getting longitude of the place
                 double lng = Double.parseDouble(hmPlace.get("lng"));
 
-                StringBuilder googlePlacesUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-                googlePlacesUrl.append("location=" + lat + "," + lng);
-                googlePlacesUrl.append("&radius=" + PROXIMITY_RADIUS);
-                googlePlacesUrl.append("&key=" + GOOGLE_API_KEY);
-                googlePlacesUrl.append("&sensor=true");
-                GooglePlacesReadTask googlePlacesReadTask = new GooglePlacesReadTask();
-                Object[] toPass = new Object[2];
-                toPass[1] = googlePlacesUrl.toString();
-                googlePlacesReadTask.execute(toPass);
-
-                double maxLat = googlePlacesReadTask.maxLat();
-                double minLat = googlePlacesReadTask.minLat();
-                double maxLng = googlePlacesReadTask.maxLng();
-                double minLng = googlePlacesReadTask.minLng();
-                SearchPhotoTask searchPhotoTask = new SearchPhotoTask(maxLat, minLat, maxLng, minLng);
-                searchPhotoTask.execute();
-
                 // Placing a marker on the touched position
                 //mMap.addMarker(markerOptions);
 
                 // Locate the first location
-                /*if (i == 0)
-                    mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));*/
+                if (i == 0) {
+                    StringBuilder googlePlacesUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+                    googlePlacesUrl.append("location=" + lat + "," + lng);
+                    googlePlacesUrl.append("&radius=" + PROXIMITY_RADIUS);
+                    googlePlacesUrl.append("&key=" + GOOGLE_API_KEY);
+                    googlePlacesUrl.append("&sensor=true");
+                    GooglePlacesReadTask googlePlacesReadTask = new GooglePlacesReadTask();
+                    Object[] toPass = new Object[2];
+                    toPass[1] = googlePlacesUrl.toString();
+                    googlePlacesReadTask.execute(toPass);
+
+                    double maxLat = googlePlacesReadTask.maxLat();
+                    double minLat = googlePlacesReadTask.minLat();
+                    double maxLng = googlePlacesReadTask.maxLng();
+                    double minLng = googlePlacesReadTask.minLng();
+                    SearchPhotoTask searchPhotoTask = new SearchPhotoTask(maxLat, minLat, maxLng, minLng);
+                    searchPhotoTask.execute();
+                }
             }
         }
     }
