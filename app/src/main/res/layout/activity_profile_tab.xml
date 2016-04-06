@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="picshare.mk.com.picshare.Tabs.ProfileTab"
-    android:fillViewport="false">
 
-    <LinearLayout
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:context="picshare.mk.com.picshare.Tabs.ProfileTab"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="130dp"
             android:padding="10dp"
             >
-            <ImageView
+            <com.pkmmte.view.CircularImageView
+
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:id="@+id/avatar"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                tools:background="#AAA"
-                android:layout_marginTop="20dp"
-                android:layout_marginLeft="20dp" />
+                android:src="@mipmap/logo"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp" />
+
             <TextView
                 android:id="@+id/pseudo"
                 android:layout_width="wrap_content"
@@ -99,7 +99,7 @@
         <GridView
             android:id="@+id/gridViewPhoto"
             android:layout_width="fill_parent"
-            android:layout_height="296dp"
+            android:layout_height="match_parent"
             android:columnWidth="90dp"
             android:numColumns="auto_fit"
             android:verticalSpacing="0dp"
@@ -108,8 +108,3 @@
             android:gravity="center" />
 
     </LinearLayout>
-
-
-
-
-</ScrollView>
