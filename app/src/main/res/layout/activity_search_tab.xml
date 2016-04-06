@@ -30,6 +30,19 @@
             android:hint="Search"
             android:inputType="text" />
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/btn_show">
+
+
+            <ListView
+                android:id="@+id/SearchPostsListView"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"></ListView>
+
+        </FrameLayout>
 
     </RelativeLayout>
 

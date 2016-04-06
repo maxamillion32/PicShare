@@ -13,6 +13,7 @@ import java.util.List;
 public class PlacesDisplayTask extends AsyncTask<Object, Integer, List<HashMap<String, String>>> {
 
     JSONObject googlePlacesJson;
+    double maxLat = 0, minLat = 0, maxLng = 0, minLng = 0;
 
     @Override
     protected List<HashMap<String, String>> doInBackground(Object... inputObj) {
@@ -22,7 +23,6 @@ public class PlacesDisplayTask extends AsyncTask<Object, Integer, List<HashMap<S
 
         try {
             googlePlacesJson = new JSONObject((String) inputObj[1]);
-            System.out.println(googlePlacesJson);
             googlePlacesList = placeJsonParser.parse(googlePlacesJson);
         } catch (Exception e) {
         }
@@ -31,18 +31,44 @@ public class PlacesDisplayTask extends AsyncTask<Object, Integer, List<HashMap<S
 
     @Override
     protected void onPostExecute(List<HashMap<String, String>> list) {
+
         for (int i = 0; i < list.size(); i++) {
             MarkerOptions markerOptions = new MarkerOptions();
             HashMap<String, String> googlePlace = list.get(i);
             double lat = Double.parseDouble(googlePlace.get("lat"));
+            if (lat > maxLat) {
+                maxLat = lat;
+            }
+            if (lat < minLat) {
+                minLat = lat;
+            }
             double lng = Double.parseDouble(googlePlace.get("lng"));
-            String placeName = googlePlace.get("place_name");
-            System.out.println(placeName);
-            String vicinity = googlePlace.get("vicinity");
+            if (lng > maxLat) {
+                maxLng = lng;
+            }
+            if (lng < minLat) {
+                minLng = lng;
+            }
             LatLng latLng = new LatLng(lat, lng);
             System.out.println(latLng);
-            System.out.println(placeName + " : " + vicinity);
         }
+
+    }
+
+    public double getMaxLng() {
+        return maxLng;
+    }
+
+    public double getMinLng() {
+        return minLng;
+    }
+
+    public double getMaxLat() {
+        return maxLat;
+    }
+
+    public double getMinLat() {
+        return minLat;
     }
 }
 

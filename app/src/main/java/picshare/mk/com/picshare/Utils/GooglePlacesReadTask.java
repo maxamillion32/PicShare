@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 
 public class GooglePlacesReadTask extends AsyncTask<Object, Integer, String> {
     String googlePlacesData = null;
+    PlacesDisplayTask placesDisplayTask = null;
 
     @Override
     protected String doInBackground(Object... inputObj) {
@@ -18,9 +19,25 @@ public class GooglePlacesReadTask extends AsyncTask<Object, Integer, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        PlacesDisplayTask placesDisplayTask = new PlacesDisplayTask();
+        placesDisplayTask = new PlacesDisplayTask();
         Object[] toPass = new Object[2];
         toPass[1] = result;
         placesDisplayTask.execute(toPass);
+    }
+
+    public double maxLng() {
+        return placesDisplayTask.getMaxLng();
+    }
+
+    public double minLng() {
+        return placesDisplayTask.getMinLng();
+    }
+
+    public double maxLat() {
+        return placesDisplayTask.getMaxLat();
+    }
+
+    public double minLat() {
+        return placesDisplayTask.getMinLat();
     }
 }

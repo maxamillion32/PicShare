@@ -1,5 +1,11 @@
 package picshare.mk.com.picshare.Tabs;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -7,11 +13,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -22,17 +32,24 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import picshare.mk.com.picshare.Post;
+import picshare.mk.com.picshare.PostsAdapter;
 import picshare.mk.com.picshare.R;
+import picshare.mk.com.picshare.Utils.AppUtils;
 import picshare.mk.com.picshare.Utils.GeocodeJSONParser;
 import picshare.mk.com.picshare.Utils.GooglePlacesReadTask;
+import picshare.mk.com.picshare.Utils.JSONParser;
 
 public class SearchTab extends AppCompatActivity {
 
     Button mBtnFind;
     EditText etPlace;
+    ListView mListView;
+    AppUtils appUtils;
     private static final String GOOGLE_API_KEY = "AIzaSyA9-04GzkX4_1va1melL9mHnW5BDsrYAYc";
     private int PROXIMITY_RADIUS = 5000;
 
@@ -40,6 +57,9 @@ public class SearchTab extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_tab);
+
+        mListView = (ListView) findViewById(R.id.SearchPostsListView);
+        appUtils = new AppUtils();
 
         // Getting reference to the find button
         mBtnFind = (Button) findViewById(R.id.btn_show);
@@ -170,6 +190,7 @@ public class SearchTab extends AppCompatActivity {
     class ParserTask extends AsyncTask<String, Integer, List<HashMap<String, String>>> {
 
         JSONObject jObject;
+        List<Post> posts = new ArrayList<Post>();
 
         // Invoked by execute() method of this object
         @Override
@@ -211,17 +232,6 @@ public class SearchTab extends AppCompatActivity {
                 // Getting longitude of the place
                 double lng = Double.parseDouble(hmPlace.get("lng"));
 
-                // Getting name
-                String name = hmPlace.get("formatted_address");
-
-                LatLng latLng = new LatLng(lat, lng);
-
-                // Setting the position for the marker
-                markerOptions.position(latLng);
-
-                // Setting the title for the marker
-                markerOptions.title(name);
-
                 StringBuilder googlePlacesUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
                 googlePlacesUrl.append("location=" + lat + "," + lng);
                 googlePlacesUrl.append("&radius=" + PROXIMITY_RADIUS);
@@ -232,6 +242,13 @@ public class SearchTab extends AppCompatActivity {
                 toPass[1] = googlePlacesUrl.toString();
                 googlePlacesReadTask.execute(toPass);
 
+                double maxLat = googlePlacesReadTask.maxLat();
+                double minLat = googlePlacesReadTask.minLat();
+                double maxLng = googlePlacesReadTask.maxLng();
+                double minLng = googlePlacesReadTask.minLng();
+                SearchPhotoTask searchPhotoTask = new SearchPhotoTask(maxLat, minLat, maxLng, minLng);
+                searchPhotoTask.execute();
+
                 // Placing a marker on the touched position
                 //mMap.addMarker(markerOptions);
 
@@ -240,5 +257,109 @@ public class SearchTab extends AppCompatActivity {
                     mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));*/
             }
         }
+    }
+
+    public class SearchPhotoTask extends AsyncTask<String, String, List<Post>> {
+
+        double maxLat = 0, minLat = 0, maxLng = 0, minLng = 0;
+
+        public SearchPhotoTask(double maxLat, double minLat, double maxLng, double minLng) {
+            this.maxLat = maxLat;
+            this.minLat = minLat;
+            this.maxLng = maxLng;
+            this.minLng = minLng;
+        }
+
+        @Override
+        protected List<Post> doInBackground(String... params) {
+            if (isNetworkAvailable()) {
+                List<Post> posts = new ArrayList<Post>();
+
+                ArrayList<NameValuePair> param = new ArrayList<NameValuePair>();
+
+                param.add(new BasicNameValuePair("maxLat", String.valueOf(maxLat)));
+                param.add(new BasicNameValuePair("minLat", String.valueOf(minLat)));
+                param.add(new BasicNameValuePair("maxLng", String.valueOf(maxLng)));
+                param.add(new BasicNameValuePair("minLng", String.valueOf(minLng)));
+
+                JSONParser jParser = new JSONParser();
+                JSONObject json = jParser.makeHttpRequest("http://picshare-android.esy.es/ws/searchPhoto.php", "GET", param);
+
+                int success = 0;
+                try {
+                    success = json.getInt("success");
+                    if (success == 1) {
+                        JSONArray postsData = json.getJSONArray("Posts");
+                        for (int i = 0; i < postsData.length(); i++) {
+                            JSONObject postData = postsData.getJSONObject(i);
+                            String userName = postData.getString("firstName") + " " + postData.getString("lastName");
+                            String userAvatar = postData.getString("avatar_url");
+                            String postId = postData.getString("post_id");
+                            String title = postData.getString("title");
+                            String picture = postData.getString("image_url");
+                            String date = postData.getString("date");
+                            String likes = postData.getString("likes");
+                            String location = postData.getString("location");
+                            posts.add(new Post(postId, title, userName, likes, picture, userAvatar, location, date));
+                            System.out.println(posts.get(i));
+                        }
+                        return posts;
+                    } else {
+                        System.out.println("Failure");
+                        posts.add(new Post("", "No Posts", "", "", "", "", "", ""));
+                        return posts;
+                    }
+
+                } catch (JSONException e) {
+                    posts.add(new Post("", "No Posts", "", "", "", "", "", ""));
+                    return posts;
+                }
+            } else {
+
+                return null;
+            }
+        }
+
+        protected void onPostExecute(List<Post> posts) {
+            super.onPostExecute(posts);
+            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SearchTab.this);
+
+            if (posts == null) {//No Internet connection
+                alertDialogBuilder.setMessage("Sorry There is no Internet Connection !! ");
+                alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        Intent intent = new Intent(Intent.ACTION_MAIN);
+                        intent.addCategory(Intent.CATEGORY_HOME);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    }
+                });
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+            } else {
+                if (posts.get(0).getTitle() == "No Posts") { //No Posts
+                    alertDialogBuilder.setMessage("Sorry There are no Posts !! ");
+                    alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface arg0, int arg1) {
+                            finish();
+                        }
+                    });
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
+                } else {
+                    PostsAdapter adapter = new PostsAdapter(SearchTab.this, posts);
+                    mListView.setAdapter(adapter);
+                }
+            }
+        }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }
