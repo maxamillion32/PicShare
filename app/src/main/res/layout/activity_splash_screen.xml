@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/splash"
+    android:background="@mipmap/splash_orange"
     tools:context="picshare.mk.com.picshare.SplashScreen">
 
 
