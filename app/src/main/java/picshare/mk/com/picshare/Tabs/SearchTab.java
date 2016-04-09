@@ -270,7 +270,6 @@ public class SearchTab extends AppCompatActivity {
         protected List<Post> doInBackground(String... params) {
             if (isNetworkAvailable()) {
                 List<Post> posts = new ArrayList<Post>();
-
                 ArrayList<NameValuePair> param = new ArrayList<NameValuePair>();
 
                 JSONParser jParser = new JSONParser();
