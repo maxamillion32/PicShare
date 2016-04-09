@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -43,7 +44,7 @@ public class HomeTab extends AppCompatActivity {
             postTask= new PostsTasks();
             postTask.execute();
         }else{
-            appUtils.noInternetConnection(this.isNetworkAvailable(),HomeTab.this);
+            appUtils.noInternetConnection(this.isNetworkAvailable(), HomeTab.this);
         }
 
 
@@ -132,8 +133,12 @@ public class HomeTab extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-        postTask= new PostsTasks();
-        postTask.execute();
+        if(isNetworkAvailable()) {
+            postTask = new PostsTasks();
+            postTask.execute();
+        }else{
+            Toast.makeText(HomeTab.this, "No Internet Connection !!", Toast.LENGTH_LONG).show();
+        }
 
     }
     private boolean isNetworkAvailable() {
