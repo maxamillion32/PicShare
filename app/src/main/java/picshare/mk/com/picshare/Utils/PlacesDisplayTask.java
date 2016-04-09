@@ -32,10 +32,15 @@ public class PlacesDisplayTask extends AsyncTask<Object, Integer, List<HashMap<S
     @Override
     protected void onPostExecute(List<HashMap<String, String>> list) {
 
+        maxLat = Double.parseDouble(list.get(0).get("lat"));
+        minLat = Double.parseDouble(list.get(0).get("lat"));
+        maxLng = Double.parseDouble(list.get(0).get("lng"));
+        minLng = Double.parseDouble(list.get(0).get("lng"));
         for (int i = 0; i < list.size(); i++) {
             MarkerOptions markerOptions = new MarkerOptions();
             HashMap<String, String> googlePlace = list.get(i);
             double lat = Double.parseDouble(googlePlace.get("lat"));
+
             if (lat > maxLat) {
                 maxLat = lat;
             }
@@ -50,7 +55,6 @@ public class PlacesDisplayTask extends AsyncTask<Object, Integer, List<HashMap<S
                 minLng = lng;
             }
             LatLng latLng = new LatLng(lat, lng);
-            System.out.println(latLng);
         }
 
     }

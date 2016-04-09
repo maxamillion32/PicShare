@@ -17,7 +17,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -274,13 +273,8 @@ public class SearchTab extends AppCompatActivity {
 
                 ArrayList<NameValuePair> param = new ArrayList<NameValuePair>();
 
-                param.add(new BasicNameValuePair("maxLat", String.valueOf(maxLat)));
-                param.add(new BasicNameValuePair("minLat", String.valueOf(minLat)));
-                param.add(new BasicNameValuePair("maxLng", String.valueOf(maxLng)));
-                param.add(new BasicNameValuePair("minLng", String.valueOf(minLng)));
-
                 JSONParser jParser = new JSONParser();
-                JSONObject json = jParser.makeHttpRequest("http://picshare-android.esy.es/ws/searchPhoto.php", "GET", param);
+                JSONObject json = jParser.makeHttpRequest("http://picshare-android.esy.es/ws/getPosts.php", "GET", param);
 
                 int success = 0;
                 try {
@@ -297,7 +291,13 @@ public class SearchTab extends AppCompatActivity {
                             String date = postData.getString("date");
                             String likes = postData.getString("likes");
                             String location = postData.getString("location");
-                            posts.add(new Post(postId, title, userName, likes, picture, userAvatar, location, date));
+                            String[] coord = location.split(",");
+                            double latitude = Double.parseDouble(coord[0]);
+                            double longitude = Double.parseDouble(coord[1]);
+                            if ((latitude >= minLat) && (latitude <= maxLat) &&
+                                    (longitude >= minLng) && (longitude <= maxLng)) {
+                                posts.add(new Post(postId, title, userName, likes, picture, userAvatar, location, date));
+                            }
                             System.out.println(posts.get(i));
                         }
                         return posts;
