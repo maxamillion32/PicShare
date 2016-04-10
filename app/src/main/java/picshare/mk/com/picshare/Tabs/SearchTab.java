@@ -244,6 +244,11 @@ public class SearchTab extends AppCompatActivity {
                     toPass[1] = googlePlacesUrl.toString();
                     googlePlacesReadTask.execute(toPass);
 
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     double maxLat = googlePlacesReadTask.maxLat();
                     double minLat = googlePlacesReadTask.minLat();
                     double maxLng = googlePlacesReadTask.maxLng();
@@ -297,7 +302,9 @@ public class SearchTab extends AppCompatActivity {
                                     (longitude >= minLng) && (longitude <= maxLng)) {
                                 posts.add(new Post(postId, title, userName, likes, picture, userAvatar, location, date));
                             }
-                            System.out.println(posts.get(i));
+                        }
+                        if (posts.size() == 0) {
+                            posts.add(new Post("", "No Posts", "", "", "", "", "", ""));
                         }
                         return posts;
                     } else {
