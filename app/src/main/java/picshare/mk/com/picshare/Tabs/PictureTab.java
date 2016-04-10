@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -52,6 +54,7 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
     private Button postButton;
     private Bitmap bitmap;
     private Uri filePath;
+    private String imagepath=null;
     EditText title;
     private ImageUtils img;
     MyGpsLocationListener gps;
@@ -115,14 +118,27 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
 
         if (requestCode == 0 && resultCode == Activity.RESULT_OK) {//Take image using camera
             filePath = data.getData();
-            try {
+           /* try {
                  bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
                 picture.setImageBitmap(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+            }*/
+            Uri selectedImageUri = data.getData();
+            imagepath = getPath(selectedImageUri);
+            Bitmap bitmap= BitmapFactory.decodeFile(imagepath);
+            picture.setImageBitmap(bitmap);
+
         }
 
+
+    }
+    public String getPath(Uri uri) {
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
     }
     private void takePicture(){
 
@@ -158,7 +174,8 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
             parameters.add(new BasicNameValuePair("title", title));
             parameters.add(new BasicNameValuePair("date", date));
             parameters.add(new BasicNameValuePair("user_id", user));
-            parameters.add(new BasicNameValuePair("image_url", "http://picshare-android.esy.es/images/posts/" + image + ".png"));
+            String path=imagepath.substring(imagepath.lastIndexOf("/"),imagepath.length());
+            parameters.add(new BasicNameValuePair("image_url", "http://meetbuddies.net16.net/images/posts/uploads" + path));
             JSONParser jParser = new JSONParser();
             JSONObject json = jParser.makeHttpRequest("http://picshare-android.esy.es/ws/addPost.php", "GET", parameters);
             Log.i("response http", json.toString());
@@ -166,12 +183,9 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
                 Thread t= new Thread(new Runnable() {
                     @Override
                     public void run() {
+                    appU.uploadFile(imagepath,"http://meetbuddies.net16.net/images/posts/uploadImg.php",PictureTab.this,imagepath);
 
-                        img= new ImageUtils("http://picshare-android.esy.es/images/posts/uploadPost.php",bitmap, image,PictureTab.this);
-                        img.uploadImage();
                     }
-
-
                 });
                 t.start();
             }
