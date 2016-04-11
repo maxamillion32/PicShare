@@ -153,15 +153,6 @@ public class AppUtils {
         camera.setDisplayOrientation(result);
     }
 
-    public String getStringImage(Bitmap bmp) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        //byte[] imageBytes = baos.toByteArray();
-        byte[] imageBytes = new byte[3000];
-
-        String encodedImage = Base64.encodeObject(imageBytes, Base64.ENCODE);
-        return encodedImage;
-    }
     public int uploadFile(String sourceFileUri, String upLoadServerUri, final Context context, final String imagepath) {
 
 
