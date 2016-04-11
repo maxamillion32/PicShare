@@ -20,7 +20,9 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:text="Search" />
+            android:background="@drawable/signin_button"
+            android:text="Search"
+            android:textColor="@android:color/white" />
 
         <EditText
             android:id="@+id/et_place"

@@ -1,6 +1,7 @@
 package picshare.mk.com.picshare.Tabs;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -77,6 +78,10 @@ public class SearchTab extends AppCompatActivity {
                     return;
                 }
 
+                ProgressDialog pdialog = new ProgressDialog(SearchTab.this);
+                pdialog.setMessage("Loading... Please Wait");
+                pdialog.show();
+
                 String url = "https://maps.googleapis.com/maps/api/geocode/json?";
 
                 try {
@@ -96,7 +101,7 @@ public class SearchTab extends AppCompatActivity {
 
                 // Instantiating DownloadTask to get places from Google Geocoding service
                 // in a non-ui thread
-                DownloadTask downloadTask = new DownloadTask();
+                DownloadTask downloadTask = new DownloadTask(pdialog);
 
                 // Start downloading the geocoding places
                 downloadTask.execute(url);
@@ -154,6 +159,11 @@ public class SearchTab extends AppCompatActivity {
     private class DownloadTask extends AsyncTask<String, Integer, String> {
 
         String data = null;
+        ProgressDialog pdialog;
+
+        public DownloadTask(ProgressDialog pdialog) {
+            this.pdialog = pdialog;
+        }
 
         // Invoked by execute() method of this object
         @Override
@@ -172,7 +182,7 @@ public class SearchTab extends AppCompatActivity {
 
             // Instantiating ParserTask which parses the json data from Geocoding webservice
             // in a non-ui thread
-            ParserTask parserTask = new ParserTask();
+            ParserTask parserTask = new ParserTask(pdialog);
 
             // Start parsing the places in JSON format
             // Invokes the "doInBackground()" method of the class ParseTask
@@ -188,6 +198,11 @@ public class SearchTab extends AppCompatActivity {
 
         JSONObject jObject;
         List<Post> posts = new ArrayList<Post>();
+        ProgressDialog pdialog;
+
+        public ParserTask(ProgressDialog pdialog) {
+            this.pdialog = pdialog;
+        }
 
         // Invoked by execute() method of this object
         @Override
@@ -212,13 +227,7 @@ public class SearchTab extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<HashMap<String, String>> list) {
 
-            // Clears all the existing markers
-            //mMap.clear();
-
             for (int i = 0; i < list.size(); i++) {
-
-                // Creating a marker
-                // MarkerOptions markerOptions = new MarkerOptions();
 
                 // Getting a place from the places list
                 HashMap<String, String> hmPlace = list.get(i);
@@ -228,9 +237,6 @@ public class SearchTab extends AppCompatActivity {
 
                 // Getting longitude of the place
                 double lng = Double.parseDouble(hmPlace.get("lng"));
-
-                // Placing a marker on the touched position
-                //mMap.addMarker(markerOptions);
 
                 // Locate the first location
                 if (i == 0) {
@@ -253,7 +259,7 @@ public class SearchTab extends AppCompatActivity {
                     double minLat = googlePlacesReadTask.minLat();
                     double maxLng = googlePlacesReadTask.maxLng();
                     double minLng = googlePlacesReadTask.minLng();
-                    SearchPhotoTask searchPhotoTask = new SearchPhotoTask(maxLat, minLat, maxLng, minLng);
+                    SearchPhotoTask searchPhotoTask = new SearchPhotoTask(pdialog, maxLat, minLat, maxLng, minLng);
                     searchPhotoTask.execute();
                 }
             }
@@ -263,8 +269,10 @@ public class SearchTab extends AppCompatActivity {
     public class SearchPhotoTask extends AsyncTask<String, String, List<Post>> {
 
         double maxLat = 0, minLat = 0, maxLng = 0, minLng = 0;
+        ProgressDialog pdialog;
 
-        public SearchPhotoTask(double maxLat, double minLat, double maxLng, double minLng) {
+        public SearchPhotoTask(ProgressDialog pdialog, double maxLat, double minLat, double maxLng, double minLng) {
+            this.pdialog = pdialog;
             this.maxLat = maxLat;
             this.minLat = minLat;
             this.maxLng = maxLng;
@@ -327,6 +335,7 @@ public class SearchTab extends AppCompatActivity {
             super.onPostExecute(posts);
             final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SearchTab.this);
 
+            pdialog.dismiss();
             if (posts == null) {//No Internet connection
                 alertDialogBuilder.setMessage("Sorry There is no Internet Connection !! ");
                 alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
