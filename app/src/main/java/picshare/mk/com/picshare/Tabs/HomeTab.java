@@ -118,7 +118,7 @@ public class HomeTab extends AppCompatActivity {
                     alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface arg0, int arg1) {
-                            finish();
+                          //  finish();
                         }
                     });
                     AlertDialog alertDialog = alertDialogBuilder.create();

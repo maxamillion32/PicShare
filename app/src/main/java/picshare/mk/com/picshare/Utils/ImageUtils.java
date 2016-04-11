@@ -217,5 +217,6 @@ public class ImageUtils {
         Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, false);
         return resizedBitmap;
     }
+
 }
 

@@ -3,8 +3,11 @@ package picshare.mk.com.picshare;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -26,6 +29,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import picshare.mk.com.picshare.Utils.AppUtils;
 import picshare.mk.com.picshare.Utils.ImageUtils;
 import picshare.mk.com.picshare.Utils.JSONParser;
 
@@ -40,6 +44,8 @@ public class SignUp extends AppCompatActivity {
     private static Uri filePath;
     private static Bitmap bitmap=null;
     private ImageUtils img;
+    private String imagepath=null;
+    private AppUtils appU;
     private ImageView userPic;
     private SubscribeTask subTask = null;
     private String UPLOAD_URL ="http://picshare-android.esy.es/images/users/upload.php";
@@ -54,6 +60,7 @@ public class SignUp extends AppCompatActivity {
         confirmPass=(TextView) findViewById(R.id.tConfirmPassword);
         uploadPic = (ImageView) findViewById(R.id.upload_picture);
         bOk = (Button) findViewById(R.id.bok);
+        appU=new AppUtils();
         this.setDialogButtonsClickBehavior();//Define Dialog buttons onCLickListener
         dialog = new UploadDialog(this,dialogListener);
         uploadPic.setOnClickListener(new View.OnClickListener() {
@@ -174,6 +181,13 @@ public class SignUp extends AppCompatActivity {
         };
 
     }
+    public String getPath(Uri uri) {
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -181,23 +195,33 @@ public class SignUp extends AppCompatActivity {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
             filePath = data.getData();
-            //Toast.makeText(SignUp.this,filePath.toString(), Toast.LENGTH_SHORT).show();
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                uploadPic.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Uri selectedImageUri = data.getData();
+            imagepath = getPath(selectedImageUri);
+            Bitmap bitmap= BitmapFactory.decodeFile(imagepath);
+            uploadPic.setImageBitmap(bitmap);
         }
         if (requestCode == 0 && resultCode == Activity.RESULT_OK) {//Take image using camera
             filePath = data.getData();
-            //Toast.makeText(SignUp.this,filePath.toString(), Toast.LENGTH_SHORT).show();
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                uploadPic.setImageBitmap(bitmap);
+            Uri selectedImageUri = data.getData();
+            imagepath = getPath(selectedImageUri);
+            Bitmap bitmap= BitmapFactory.decodeFile(imagepath);
+            ExifInterface ei = null;
+            try { //Fixing Image Orientation Issue; Checking the screen orientation then we rotate the ImageView
+                ei = new ExifInterface(imagepath);
+                int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+                switch(orientation) {
+                    case ExifInterface.ORIENTATION_ROTATE_270:
+                        bitmap=appU.rotateImage(bitmap, 270);
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_180:
+                        bitmap=appU.rotateImage(bitmap, 180);
+                        break;
+                    // etc.
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            uploadPic.setImageBitmap(bitmap);
         }
 
     }
@@ -234,7 +258,8 @@ public class SignUp extends AppCompatActivity {
         parames.add(new BasicNameValuePair("lastName", lastName));
         parames.add(new BasicNameValuePair("email", email));
         parames.add(new BasicNameValuePair("password", mPass));
-        parames.add(new BasicNameValuePair("avatar_url", "http://picshare-android.esy.es/images/users/"+avatar+".png"));
+        String path=imagepath.substring(imagepath.lastIndexOf("/"), imagepath.length());
+        parames.add(new BasicNameValuePair("avatar_url", "http://meetbuddies.net16.net/images/users/uploads"+path));
 
 
         JSONParser jParser = new JSONParser();
@@ -247,9 +272,9 @@ public class SignUp extends AppCompatActivity {
             Thread t= new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    System.out.println(avatar);
-                    img= new ImageUtils(UPLOAD_URL,bitmap, avatar,SignUp.this);
-                    img.uploadImage();
+
+                    appU.uploadFile(imagepath,"http://meetbuddies.net16.net/images/users/uploadImg.php",SignUp.this,imagepath);
+
                 }
 
 
@@ -261,7 +286,7 @@ public class SignUp extends AppCompatActivity {
 
         try {
             synchronized (this) {
-                wait(8000);
+                wait(6000);
                 int success = json.getInt("success");
 
                 if (success == 1) {

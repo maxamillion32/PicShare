@@ -49,7 +49,7 @@ public class SearchTab extends AppCompatActivity {
     ListView mListView;
     AppUtils appUtils;
     private static final String GOOGLE_API_KEY = "AIzaSyA9-04GzkX4_1va1melL9mHnW5BDsrYAYc";
-    private int PROXIMITY_RADIUS = 5000;
+    private int PROXIMITY_RADIUS = 15000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -355,7 +355,7 @@ public class SearchTab extends AppCompatActivity {
                     alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface arg0, int arg1) {
-                            finish();
+                          //  finish();
                         }
                     });
                     AlertDialog alertDialog = alertDialogBuilder.create();

@@ -12,6 +12,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
@@ -24,6 +25,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.loopj.android.image.SmartImageView;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -48,16 +51,15 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
     private SensorManager mSensorManager;
     private NewPostTask postTask;
     private Sensor mPressure;
-    SessionManager session;
-    private ImageView picture;
+    private SessionManager session;
+    private SmartImageView picture;
     private AppUtils appU;
     private Button postButton;
     private Bitmap bitmap;
     private Uri filePath;
     private String imagepath=null;
-    EditText title;
-    private ImageUtils img;
-    MyGpsLocationListener gps;
+    private EditText title;
+    private MyGpsLocationListener gps;
     private String currentLocation, date;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +67,7 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
         setContentView(R.layout.activity_picture_tab);
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mPressure = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        picture=(ImageView)findViewById(R.id.takenPicture);
+        picture=(SmartImageView)findViewById(R.id.takenPicture);
         title=(EditText)findViewById(R.id.post_title);
         postButton=(Button)findViewById(R.id.buttonPost);
         session= new SessionManager(PictureTab.this);
@@ -118,16 +120,32 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
 
         if (requestCode == 0 && resultCode == Activity.RESULT_OK) {//Take image using camera
             filePath = data.getData();
-           /* try {
-                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                picture.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
+
             Uri selectedImageUri = data.getData();
             imagepath = getPath(selectedImageUri);
-            Bitmap bitmap= BitmapFactory.decodeFile(imagepath);
+             Bitmap bitmap= BitmapFactory.decodeFile(imagepath);
+            ExifInterface ei = null;
+            try { //Fixing Image Orientation Issue; Checking the screen orientation then we rotate the ImageView
+                ei = new ExifInterface(imagepath);
+                int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+                switch(orientation) {
+                    case ExifInterface.ORIENTATION_ROTATE_270:
+                        bitmap=appU.rotateImage(bitmap, 270);
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_180:
+                        bitmap=appU.rotateImage(bitmap, 180);
+                        break;
+                    // etc.
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             picture.setImageBitmap(bitmap);
+
+           // picture.setImageBitmap(bitmap);
+
+            //picture.setImageUrl(imagepath);
+           // picture.setImageBitmap();
 
         }
 
@@ -174,7 +192,7 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
             parameters.add(new BasicNameValuePair("title", title));
             parameters.add(new BasicNameValuePair("date", date));
             parameters.add(new BasicNameValuePair("user_id", user));
-            String path=imagepath.substring(imagepath.lastIndexOf("/"),imagepath.length());
+            String path=imagepath.substring(imagepath.lastIndexOf("/"), imagepath.length());
             parameters.add(new BasicNameValuePair("image_url", "http://meetbuddies.net16.net/images/posts/uploads" + path));
             JSONParser jParser = new JSONParser();
             JSONObject json = jParser.makeHttpRequest("http://picshare-android.esy.es/ws/addPost.php", "GET", parameters);
