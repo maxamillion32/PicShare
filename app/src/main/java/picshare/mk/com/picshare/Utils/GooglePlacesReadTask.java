@@ -48,14 +48,15 @@ public class GooglePlacesReadTask extends AsyncTask<Object, Integer, String> {
                     minLat = lat;
                 }
                 double lng = Double.parseDouble(googlePlace.get("lng"));
-                if (lng > maxLat) {
+                if (lng > maxLng) {
                     maxLng = lng;
                 }
-                if (lng < minLat) {
+                if (lng < minLng) {
                     minLng = lng;
                 }
             }
         }
+
         return googlePlacesData;
     }
 
