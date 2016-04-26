@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -78,35 +77,46 @@ public class SearchTab extends AppCompatActivity {
                     return;
                 }
 
-                ProgressDialog pdialog = new ProgressDialog(SearchTab.this);
-                pdialog.setMessage("Loading... Please Wait");
-                pdialog.show();
+                if (isNetworkAvailable()) {
+                    ProgressDialog pdialog = new ProgressDialog(SearchTab.this);
+                    pdialog.setMessage("Loading... Please Wait");
+                    pdialog.show();
 
-                String url = "https://maps.googleapis.com/maps/api/geocode/json?";
+                    String url = "https://maps.googleapis.com/maps/api/geocode/json?";
 
-                try {
-                    // encoding special characters like space in the user input place
-                    location = URLEncoder.encode(location, "utf-8");
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    try {
+                        // encoding special characters like space in the user input place
+                        location = URLEncoder.encode(location, "utf-8");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+
+                    String address = "address=" + location;
+
+                    String sensor = "sensor=false";
+
+
+                    // url , from where the geocoding data is fetched
+                    url = url + address + "&" + sensor;
+
+                    // Instantiating DownloadTask to get places from Google Geocoding service
+                    // in a non-ui thread
+                    DownloadTask downloadTask = new DownloadTask(pdialog);
+
+                    // Start downloading the geocoding places
+                    downloadTask.execute(url);
+
+                } else {
+                    final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SearchTab.this);
+                    alertDialogBuilder.setMessage("Sorry There is no Internet Connection !! ");
+                    alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface arg0, int arg1) {
+                        }
+                    });
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
                 }
-
-                String address = "address=" + location;
-
-                String sensor = "sensor=false";
-
-
-                // url , from where the geocoding data is fetched
-                url = url + address + "&" + sensor;
-
-                // Instantiating DownloadTask to get places from Google Geocoding service
-                // in a non-ui thread
-                DownloadTask downloadTask = new DownloadTask(pdialog);
-
-                // Start downloading the geocoding places
-                downloadTask.execute(url);
-
-
             }
         });
 
@@ -306,8 +316,7 @@ public class SearchTab extends AppCompatActivity {
                             String[] coord = location.split(",");
                             double latitude = Double.parseDouble(coord[0]);
                             double longitude = Double.parseDouble(coord[1]);
-                            if ((latitude >= minLat) && (latitude <= maxLat) &&
-                                    (longitude >= minLng) && (longitude <= maxLng)) {
+                            if ((latitude >= minLat) && (latitude <= maxLat)) {
                                 posts.add(new Post(postId, title, userName, likes, picture, userAvatar, location, date));
                             }
                         }
@@ -341,10 +350,6 @@ public class SearchTab extends AppCompatActivity {
                 alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
-                        Intent intent = new Intent(Intent.ACTION_MAIN);
-                        intent.addCategory(Intent.CATEGORY_HOME);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
                     }
                 });
                 AlertDialog alertDialog = alertDialogBuilder.create();
@@ -355,7 +360,7 @@ public class SearchTab extends AppCompatActivity {
                     alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface arg0, int arg1) {
-                          //  finish();
+                            //  finish();
                         }
                     });
                     AlertDialog alertDialog = alertDialogBuilder.create();

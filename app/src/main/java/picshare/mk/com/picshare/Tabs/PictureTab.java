@@ -1,29 +1,30 @@
 package picshare.mk.com.picshare.Tabs;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.ExifInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.loopj.android.image.SmartImageView;
@@ -34,7 +35,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,7 +42,6 @@ import java.util.Random;
 
 import picshare.mk.com.picshare.R;
 import picshare.mk.com.picshare.Utils.AppUtils;
-import picshare.mk.com.picshare.Utils.ImageUtils;
 import picshare.mk.com.picshare.Utils.JSONParser;
 import picshare.mk.com.picshare.Utils.MyGpsLocationListener;
 import picshare.mk.com.picshare.Utils.SessionManager;
@@ -57,41 +56,54 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
     private Button postButton;
     private Bitmap bitmap;
     private Uri filePath;
-    private String imagepath=null;
+    private String imagepath = null;
     private EditText title;
     private MyGpsLocationListener gps;
     private String currentLocation, date;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_picture_tab);
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        mPressure = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        picture=(SmartImageView)findViewById(R.id.takenPicture);
-        title=(EditText)findViewById(R.id.post_title);
-        postButton=(Button)findViewById(R.id.buttonPost);
-        session= new SessionManager(PictureTab.this);
-        appU= new AppUtils();
-        gps = new MyGpsLocationListener(PictureTab.this );
-        setDateAndLocation();
-        takePicture();
-        postButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String userId=session.getId()+"";
-                String postTitle=title.getText().toString();
+        if (isNetworkAvailable()) {
+            mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+            mPressure = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+            picture = (SmartImageView) findViewById(R.id.takenPicture);
+            title = (EditText) findViewById(R.id.post_title);
+            postButton = (Button) findViewById(R.id.buttonPost);
+            session = new SessionManager(PictureTab.this);
+            appU = new AppUtils();
+            gps = new MyGpsLocationListener(PictureTab.this);
+            setDateAndLocation();
+            takePicture();
+            postButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String userId = session.getId() + "";
+                    String postTitle = title.getText().toString();
 
-                Random r = new Random();
-                String image_name="post_"+r.nextInt(8000);
-                postTask= new NewPostTask(postTitle,userId,currentLocation,date,image_name);
-                postTask.execute();
-            }
-        });
+                    Random r = new Random();
+                    String image_name = "post_" + r.nextInt(8000);
+                    postTask = new NewPostTask(postTitle, userId, currentLocation, date, image_name);
+                    postTask.execute();
+                }
+            });
+        } else {
+            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(PictureTab.this);
+            alertDialogBuilder.setMessage("Sorry There is no Internet Connection !! ");
+            alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface arg0, int arg1) {
+                }
+            });
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+        }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if(event.values[0]==0.0){
+        if (event.values[0] == 0.0) {
             takePicture();
         }
     }
@@ -100,6 +112,7 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
+
     @Override
     protected void onResume() {
         // Register a listener for the sensor.
@@ -108,12 +121,14 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
 
 
     }
+
     @Override
     protected void onPause() {
         // Be sure to unregister the sensor when the activity pauses.
         super.onPause();
         mSensorManager.unregisterListener(this);
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -123,17 +138,17 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
 
             Uri selectedImageUri = data.getData();
             imagepath = getPath(selectedImageUri);
-             Bitmap bitmap= BitmapFactory.decodeFile(imagepath);
+            Bitmap bitmap = BitmapFactory.decodeFile(imagepath);
             ExifInterface ei = null;
             try { //Fixing Image Orientation Issue; Checking the screen orientation then we rotate the ImageView
                 ei = new ExifInterface(imagepath);
                 int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-                switch(orientation) {
+                switch (orientation) {
                     case ExifInterface.ORIENTATION_ROTATE_270:
-                        bitmap=appU.rotateImage(bitmap, 270);
+                        bitmap = appU.rotateImage(bitmap, 270);
                         break;
                     case ExifInterface.ORIENTATION_ROTATE_180:
-                        bitmap=appU.rotateImage(bitmap, 180);
+                        bitmap = appU.rotateImage(bitmap, 180);
                         break;
                     // etc.
                 }
@@ -142,23 +157,25 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
             }
             picture.setImageBitmap(bitmap);
 
-           // picture.setImageBitmap(bitmap);
+            // picture.setImageBitmap(bitmap);
 
             //picture.setImageUrl(imagepath);
-           // picture.setImageBitmap();
+            // picture.setImageBitmap();
 
         }
 
 
     }
+
     public String getPath(Uri uri) {
-        String[] projection = { MediaStore.Images.Media.DATA };
+        String[] projection = {MediaStore.Images.Media.DATA};
         Cursor cursor = managedQuery(uri, projection, null, null, null);
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
         return cursor.getString(column_index);
     }
-    private void takePicture(){
+
+    private void takePicture() {
 
         Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
         startActivityForResult(intent, 0);
@@ -174,9 +191,10 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
             this.user = user;
             this.location = location;
             this.date = date;
-            this.image =image ;
+            this.image = image;
 
         }
+
         @Override
         protected void onPreExecute() {
             // TODO Auto-generated method stub
@@ -185,6 +203,7 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
             pdialog.show();
             super.onPreExecute();
         }
+
         @Override
         protected String doInBackground(String... params) {
             ArrayList<NameValuePair> parameters = new ArrayList<NameValuePair>();
@@ -192,16 +211,16 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
             parameters.add(new BasicNameValuePair("title", title));
             parameters.add(new BasicNameValuePair("date", date));
             parameters.add(new BasicNameValuePair("user_id", user));
-            String path=imagepath.substring(imagepath.lastIndexOf("/"), imagepath.length());
+            String path = imagepath.substring(imagepath.lastIndexOf("/"), imagepath.length());
             parameters.add(new BasicNameValuePair("image_url", "http://meetbuddies.net16.net/images/posts/uploads" + path));
             JSONParser jParser = new JSONParser();
             JSONObject json = jParser.makeHttpRequest("http://picshare-android.esy.es/ws/addPost.php", "GET", parameters);
             Log.i("response http", json.toString());
             if (filePath != null) {
-                Thread t= new Thread(new Runnable() {
+                Thread t = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                    appU.uploadFile(imagepath,"http://meetbuddies.net16.net/images/posts/uploadImg.php",PictureTab.this,imagepath);
+                        appU.uploadFile(imagepath, "http://meetbuddies.net16.net/images/posts/uploadImg.php", PictureTab.this, imagepath);
 
                     }
                 });
@@ -232,6 +251,7 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
 
             return null;
         }
+
         @Override
         protected void onPostExecute(String result) {
             pdialog.dismiss();
@@ -245,13 +265,21 @@ public class PictureTab extends AppCompatActivity implements SensorEventListener
             }
         }
     }
-    private void setDateAndLocation(){
+
+    private void setDateAndLocation() {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        date=df.format(c.getTime());
+        date = df.format(c.getTime());
         if (gps.canGetLocation()) {
-            currentLocation=gps.getLatitude()+","+gps.getLongitude();
+            currentLocation = gps.getLatitude() + "," + gps.getLongitude();
         }
 
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

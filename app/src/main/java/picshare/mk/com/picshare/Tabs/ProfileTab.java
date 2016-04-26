@@ -55,24 +55,23 @@ public class ProfileTab extends AppCompatActivity {
         session = new SessionManager(ProfileTab.this);
 
         pseudo.setText(session.getName() + " " + session.getPrename());
-        avatar = (ImageView) findViewById(R.id.avatar);
-        DownloadImg down = new DownloadImg();
-        down.getImage(avatar, session.getPhotourl());
-        gridViewPhoto = (GridView) findViewById(R.id.gridViewPhoto);
-        nbLikes = (TextView) findViewById(R.id.nbL);
-        nbPublications = (TextView) findViewById(R.id.nbP);
-        exitButton = (Button) findViewById(R.id.exitButton);
-        exitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SessionManager sm = new SessionManager(view.getContext());
-                DataBaseConnector db = new DataBaseConnector(view.getContext());
-                LogoutDialog dialog = LogoutDialog.newInstance(sm, db);
-                dialog.show(getSupportFragmentManager(), "LogOut");
-            }
-        });
-
         if (isNetworkAvailable()) {
+            avatar = (ImageView) findViewById(R.id.avatar);
+            DownloadImg down = new DownloadImg();
+            down.getImage(avatar, session.getPhotourl());
+            gridViewPhoto = (GridView) findViewById(R.id.gridViewPhoto);
+            nbLikes = (TextView) findViewById(R.id.nbL);
+            nbPublications = (TextView) findViewById(R.id.nbP);
+            exitButton = (Button) findViewById(R.id.exitButton);
+            exitButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    SessionManager sm = new SessionManager(view.getContext());
+                    DataBaseConnector db = new DataBaseConnector(view.getContext());
+                    LogoutDialog dialog = LogoutDialog.newInstance(sm, db);
+                    dialog.show(getSupportFragmentManager(), "LogOut");
+                }
+            });
             mListTask = new PhotoTasks();
             mListTask.execute();
         } else {

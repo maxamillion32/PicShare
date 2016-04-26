@@ -3,19 +3,15 @@ package picshare.mk.com.picshare.Tabs;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,26 +29,36 @@ public class HomeTab extends AppCompatActivity {
     List<Post> posts = new ArrayList<Post>();
     ListView mListView;
     AppUtils appUtils;
-    private PostsTasks postTask=null;
+    private PostsTasks postTask = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_tab);
-        mListView = (ListView)findViewById(R.id.PostsListView);
-         appUtils= new AppUtils();
-        if(this.isNetworkAvailable()){
-            postTask= new PostsTasks();
+        mListView = (ListView) findViewById(R.id.PostsListView);
+        appUtils = new AppUtils();
+        if (this.isNetworkAvailable()) {
+            postTask = new PostsTasks();
             postTask.execute();
-        }else{
-            appUtils.noInternetConnection(this.isNetworkAvailable(), HomeTab.this);
+        } else {
+            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(HomeTab.this);
+            alertDialogBuilder.setMessage("Sorry There is no Internet Connection !! ");
+            alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface arg0, int arg1) {
+                }
+            });
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
         }
 
 
     }
+
     public class PostsTasks extends AsyncTask<String, String, List<Post>> {
 
         protected List<Post> doInBackground(String... params) {
-            if(isNetworkAvailable()) {
+            if (isNetworkAvailable()) {
                 List<Post> posts = new ArrayList<Post>();
 
                 ArrayList<NameValuePair> param = new ArrayList<NameValuePair>();
@@ -90,57 +96,56 @@ public class HomeTab extends AppCompatActivity {
                     posts.add(new Post("", "No Posts", "", "", "", "", "", ""));
                     return posts;
                 }
-            }else{
+            } else {
 
                 return null;
             }
         }
+
         protected void onPostExecute(List<Post> posts) {
             super.onPostExecute(posts);
             final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(HomeTab.this);
 
-            if(posts==null){//No Internet connection
+            if (posts == null) {//No Internet connection
                 alertDialogBuilder.setMessage("Sorry There is no Internet Connection !! ");
                 alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
-                        Intent intent = new Intent(Intent.ACTION_MAIN);
-                        intent.addCategory(Intent.CATEGORY_HOME);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
                     }
                 });
                 AlertDialog alertDialog = alertDialogBuilder.create();
                 alertDialog.show();
-            }else{
-                if(posts.get(0).getTitle()=="No Posts"){ //No Posts
+            } else {
+                if (posts.get(0).getTitle() == "No Posts") { //No Posts
                     alertDialogBuilder.setMessage("Sorry There are no Posts !! ");
                     alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface arg0, int arg1) {
-                          //  finish();
+                            //  finish();
                         }
                     });
                     AlertDialog alertDialog = alertDialogBuilder.create();
                     alertDialog.show();
-                }else{
+                } else {
                     PostsAdapter adapter = new PostsAdapter(HomeTab.this, posts);
                     mListView.setAdapter(adapter);
                 }
             }
-     }
+        }
     }
+
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
-        if(isNetworkAvailable()) {
+        if (isNetworkAvailable()) {
             postTask = new PostsTasks();
             postTask.execute();
-        }else{
+        } else {
             Toast.makeText(HomeTab.this, "No Internet Connection !!", Toast.LENGTH_LONG).show();
         }
 
     }
+
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

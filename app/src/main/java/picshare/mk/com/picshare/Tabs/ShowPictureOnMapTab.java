@@ -1,14 +1,16 @@
 package picshare.mk.com.picshare.Tabs;
 
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -18,11 +20,9 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.cache.memory.impl.FIFOLimitedMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -36,10 +36,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -54,71 +50,89 @@ public class ShowPictureOnMapTab extends AppCompatActivity {
     private GoogleMap googleMap;
     private AppUtils appU;
     private MyGpsLocationListener gps;
-    private  double latitude = 0;
+    private double latitude = 0;
     private double longitude = 0;
     private getPostsTask getPosts = null;
     private ImageLoader imageLoader;
     private DisplayImageOptions options;
     private Marker marker;
     private Hashtable<String, String> markers;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        appU= new AppUtils();
-        getPosts= new getPostsTask();
-        getPosts.execute();
-        setContentView(R.layout.activity_show_picture_on_map_tab);
-        gps = new MyGpsLocationListener(ShowPictureOnMapTab.this);
-        try {
-            if (googleMap == null) {
-                googleMap = ((MapFragment) getFragmentManager().
-                        findFragmentById(R.id.map)).getMap();
+        appU = new AppUtils();
+        if (isNetworkAvailable()) {
+            getPosts = new getPostsTask();
+            getPosts.execute();
+            setContentView(R.layout.activity_show_picture_on_map_tab);
+            gps = new MyGpsLocationListener(ShowPictureOnMapTab.this);
+            try {
+                if (googleMap == null) {
+                    googleMap = ((MapFragment) getFragmentManager().
+                            findFragmentById(R.id.map)).getMap();
+                }
+
+                googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                if (gps.canGetLocation()) {
+                    latitude = gps.getLatitude();
+                    longitude = gps.getLongitude();
+                } else {
+                    gps.showSettingsAlert();
+                    latitude = 45.5086699;
+                    longitude = -73.5539925;
+                }
+                CameraUpdate center =
+                        CameraUpdateFactory.newLatLng(new LatLng(latitude,
+                                longitude));//Centring the map on My Locations
+                CameraUpdate zoom = CameraUpdateFactory.zoomTo(11);
+                googleMap.moveCamera(center);
+                googleMap.animateCamera(zoom);
+                googleMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
+
+                initImageLoader();
+                markers = new Hashtable<String, String>();
+                imageLoader = ImageLoader.getInstance();
+
+                options = new DisplayImageOptions.Builder()
+                        .showStubImage(R.drawable.loading)        //	Display Stub Image
+                        .showImageForEmptyUri(R.drawable.loading)    //	If Empty image found
+                        .cacheInMemory()
+                        .cacheOnDisc().bitmapConfig(Bitmap.Config.RGB_565).build();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-            googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-            if (gps.canGetLocation()) {
-                latitude=gps.getLatitude();
-                longitude=gps.getLongitude();
-            } else {
-                gps.showSettingsAlert();
-                latitude=45.5086699;
-                longitude=-73.5539925;
-            }
-            CameraUpdate center=
-                    CameraUpdateFactory.newLatLng(new LatLng(latitude,
-                            longitude));//Centring the map on My Locations
-            CameraUpdate zoom=CameraUpdateFactory.zoomTo(11);
-            googleMap.moveCamera(center);
-            googleMap.animateCamera(zoom);
-            googleMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
-
-            initImageLoader();
-            markers = new Hashtable<String, String>();
-            imageLoader = ImageLoader.getInstance();
-
-            options = new DisplayImageOptions.Builder()
-                    .showStubImage(R.drawable.loading)		//	Display Stub Image
-                    .showImageForEmptyUri(R.drawable.loading)	//	If Empty image found
-                    .cacheInMemory()
-                    .cacheOnDisc().bitmapConfig(Bitmap.Config.RGB_565).build();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
+        } else {
+            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ShowPictureOnMapTab.this);
+            alertDialogBuilder.setMessage("Sorry There is no Internet Connection !! ");
+            alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface arg0, int arg1) {
+                }
+            });
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
         }
     }
 
     public class getPostsTask extends AsyncTask<String, String, String> {
-        ArrayList<HashMap<String,String>> myPosts= new ArrayList<>();
-        public getPostsTask(){};
+        ArrayList<HashMap<String, String>> myPosts = new ArrayList<>();
+
+        public getPostsTask() {
+        }
+
+        ;
+
         @Override
         protected void onPreExecute() {
-             super.onPreExecute();
+            super.onPreExecute();
         }
+
         @Override
         protected String doInBackground(String... params) {
             ArrayList<NameValuePair> param = new ArrayList<NameValuePair>();
             JSONParser jParser = new JSONParser();
-            JSONObject json = jParser.makeHttpRequest("http://picshare-android.esy.es/ws/getPosts.php", "GET",param);
+            JSONObject json = jParser.makeHttpRequest("http://picshare-android.esy.es/ws/getPosts.php", "GET", param);
             Log.i("response http", json.toString());
             try {
                 int success = json.getInt("success");
@@ -126,20 +140,19 @@ public class ShowPictureOnMapTab extends AppCompatActivity {
 
                     JSONArray posts = json.getJSONArray("Posts");
 
-                    for(int i=0;i<posts.length();i++){
+                    for (int i = 0; i < posts.length(); i++) {
                         JSONObject post = posts.getJSONObject(i);
-                        HashMap<String, String>  postData= new HashMap<String,String>();
-                        postData.put("user_id",post.getString("user_id"));
-                        postData.put("location",post.getString("location"));
-                        postData.put("likes",post.getString("likes"));
-                        postData.put("title",post.getString("title"));
-                        postData.put("date",post.getString("date"));
-                        postData.put("image_url",post.getString("image_url"));
+                        HashMap<String, String> postData = new HashMap<String, String>();
+                        postData.put("user_id", post.getString("user_id"));
+                        postData.put("location", post.getString("location"));
+                        postData.put("likes", post.getString("likes"));
+                        postData.put("title", post.getString("title"));
+                        postData.put("date", post.getString("date"));
+                        postData.put("image_url", post.getString("image_url"));
                         myPosts.add(postData);
                     }
                     return "success";
-                }
-                else {
+                } else {
                     //TODO Handle This case
                     return "fail";
                 }
@@ -149,17 +162,18 @@ public class ShowPictureOnMapTab extends AppCompatActivity {
 
             return null;
         }
+
         @Override
         protected void onPostExecute(String success) {
-              super.onPostExecute(success);
+            super.onPostExecute(success);
 
             if (success.equals("success")) {
-                LatLng position=new LatLng(latitude,longitude);
-                for(int i=0; i<myPosts.size();i++){
-                    Map<String,Double> coor= appU.getCoordonatesFromString(myPosts.get(i).get("location"));
-                     position= new LatLng(coor.get("latitude"), coor.get("longitude"));
+                LatLng position = new LatLng(latitude, longitude);
+                for (int i = 0; i < myPosts.size(); i++) {
+                    Map<String, Double> coor = appU.getCoordonatesFromString(myPosts.get(i).get("location"));
+                    position = new LatLng(coor.get("latitude"), coor.get("longitude"));
                     final Marker marker = googleMap.addMarker(new MarkerOptions().position(position)
-                           .title(myPosts.get(i).get("title")).snippet(myPosts.get(i).get("date")));
+                            .title(myPosts.get(i).get("title")).snippet(myPosts.get(i).get("date")));
                     markers.put(marker.getId(), myPosts.get(i).get("image_url"));
                 }
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
@@ -167,6 +181,7 @@ public class ShowPictureOnMapTab extends AppCompatActivity {
             }
         }
     }
+
     private class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
         private View view;
@@ -192,7 +207,7 @@ public class ShowPictureOnMapTab extends AppCompatActivity {
             String url = null;
 
             if (marker.getId() != null && markers != null && markers.size() > 0) {
-                if ( markers.get(marker.getId()) != null &&
+                if (markers.get(marker.getId()) != null &&
                         markers.get(marker.getId()) != null) {
                     url = markers.get(marker.getId());
 
@@ -254,13 +269,20 @@ public class ShowPictureOnMapTab extends AppCompatActivity {
                 this).threadPoolSize(5)
                 .threadPriority(Thread.NORM_PRIORITY - 2)
                 .memoryCacheSize(memoryCacheSize)
-                .memoryCache(new FIFOLimitedMemoryCache(memoryCacheSize-1000000))
+                .memoryCache(new FIFOLimitedMemoryCache(memoryCacheSize - 1000000))
                 .denyCacheImageMultipleSizesInMemory()
                 .discCacheFileNameGenerator(new Md5FileNameGenerator())
                 .tasksProcessingOrder(QueueProcessingType.LIFO).enableLogging()
                 .build();
 
         ImageLoader.getInstance().init(config);
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
 }
