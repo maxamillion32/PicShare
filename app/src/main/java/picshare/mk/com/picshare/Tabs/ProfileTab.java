@@ -1,12 +1,14 @@
 package picshare.mk.com.picshare.Tabs;
 
-import android.app.ProgressDialog;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -20,13 +22,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-import picshare.mk.com.picshare.LoginActivity;
-import picshare.mk.com.picshare.MainActivity;
 import picshare.mk.com.picshare.Photo;
 import picshare.mk.com.picshare.PhotoAdapter;
-import picshare.mk.com.picshare.Post;
 import picshare.mk.com.picshare.R;
 import picshare.mk.com.picshare.Utils.DataBaseConnector;
 import picshare.mk.com.picshare.Utils.DownloadImg;
@@ -37,17 +35,18 @@ import picshare.mk.com.picshare.Utils.SessionManager;
 public class ProfileTab extends AppCompatActivity {
 
     List<Photo> photos = new ArrayList<Photo>();
-    GridView gridViewPhoto ;
+    GridView gridViewPhoto;
     TextView pseudo;
     TextView nbLikes;
     TextView nbPublications;
     ImageView avatar;
-    int posts=0;
-    int l=0;
+    int posts = 0;
+    int l = 0;
     SessionManager session;
     DataBaseConnector db;
     private Button exitButton;
     private PhotoTasks mListTask = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,8 +61,31 @@ public class ProfileTab extends AppCompatActivity {
         gridViewPhoto = (GridView) findViewById(R.id.gridViewPhoto);
         nbLikes = (TextView) findViewById(R.id.nbL);
         nbPublications = (TextView) findViewById(R.id.nbP);
-        mListTask = new PhotoTasks();
-        mListTask.execute();
+        exitButton = (Button) findViewById(R.id.exitButton);
+        exitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SessionManager sm = new SessionManager(view.getContext());
+                DataBaseConnector db = new DataBaseConnector(view.getContext());
+                LogoutDialog dialog = LogoutDialog.newInstance(sm, db);
+                dialog.show(getSupportFragmentManager(), "LogOut");
+            }
+        });
+
+        if (isNetworkAvailable()) {
+            mListTask = new PhotoTasks();
+            mListTask.execute();
+        } else {
+            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ProfileTab.this);
+            alertDialogBuilder.setMessage("Sorry There is no Internet Connection !! ");
+            alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface arg0, int arg1) {
+                }
+            });
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+        }
     }
 
     public class PhotoTasks extends AsyncTask<String, String, List<Photo>> {
@@ -73,7 +95,7 @@ public class ProfileTab extends AppCompatActivity {
             ArrayList<NameValuePair> param = new ArrayList<NameValuePair>();
 
             SessionManager session = new SessionManager(getApplicationContext());
-            String emailParam=session.getEmail();
+            String emailParam = session.getEmail();
             param.add(new BasicNameValuePair("email", emailParam));
             JSONParser jParser = new JSONParser();
             JSONObject json = jParser.makeHttpRequest("http://picshare-android.esy.es/ws/getPhotos.php", "GET", param);
@@ -81,35 +103,14 @@ public class ProfileTab extends AppCompatActivity {
                 int success = json.getInt("success");
                 if (success == 1) {
                     JSONArray postsData = json.getJSONArray("Photos");
-                    posts=postsData.length();
+                    posts = postsData.length();
                     for (int i = 0; i < posts; i++) {
                         JSONObject postData = postsData.getJSONObject(i);
                         String image_url = postData.getString("image_url");
-                        String likes=postData.getString("likes");
-                        l+=Integer.parseInt(likes);
-                        String title=postData.getString("title");
-                        System.out.println(image_url + " " + likes + " " + title);
+                        String likes = postData.getString("likes");
+                        l += Integer.parseInt(likes);
+                        String title = postData.getString("title");
                         photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        photoList.add(new Photo(image_url));
-                        
-                        System.out.println(photoList.get(i));
                     }
 
                     return photoList;
@@ -123,15 +124,23 @@ public class ProfileTab extends AppCompatActivity {
             }
 
         }
+
         protected void onPostExecute(List<Photo> photos) {
-            if (posts>0) {
+            if (posts > 0) {
                 PhotoAdapter adapter = new PhotoAdapter(ProfileTab.this, photos);
                 gridViewPhoto.setAdapter(adapter);
             }
-            nbLikes.setText(l+"");
-            System.out.println("nombre de posts: "+ posts);
-            nbPublications.setText(posts+"");
+            nbLikes.setText(l + "");
+            System.out.println("nombre de posts: " + posts);
+            nbPublications.setText(posts + "");
             super.onPostExecute(photos);
         }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

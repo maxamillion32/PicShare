@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
-import picshare.mk.com.picshare.MainActivity;
+import picshare.mk.com.picshare.SplashScreen;
 
 public class LogoutDialog extends DialogFragment {
 
@@ -29,7 +29,7 @@ public class LogoutDialog extends DialogFragment {
                     public void onClick(DialogInterface dialog, int id) {
                         sessionManager.logoutUser();
                         dataBaseConnector.deleteAll();
-                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                        Intent intent = new Intent(getActivity(), SplashScreen.class);
                         startActivity(intent);
                     }
                 })

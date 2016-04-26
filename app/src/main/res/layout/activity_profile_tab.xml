@@ -77,12 +77,11 @@
                 android:layout_alignTop="@+id/Publications"
                 android:layout_toEndOf="@+id/Publications" />
 
-            <ImageButton
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+            <Button
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:id="@+id/exitButton"
-                android:src="@drawable/direction"
-                android:background="#00ffffff"
+                android:background="@drawable/direction"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentTop="true" />
         </RelativeLayout>
