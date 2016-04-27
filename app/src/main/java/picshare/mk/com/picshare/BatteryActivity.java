@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 public class BatteryActivity extends Activity {
 
-    TextView textBatteryLevel = null;
+    TextView batLevel, technology, plugged, health, status, voltage, temperature;
     String batteryLevelInfo = "Battery Level";
 
     @Override
@@ -20,7 +20,13 @@ public class BatteryActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_battery);
 
-        textBatteryLevel = (TextView) findViewById(R.id.txtBatteryInfo);
+        batLevel = (TextView) findViewById(R.id.batteryLevel);
+        technology = (TextView) findViewById(R.id.technology);
+        plugged = (TextView) findViewById(R.id.plugged);
+        health = (TextView) findViewById(R.id.health);
+        status = (TextView) findViewById(R.id.status);
+        voltage = (TextView) findViewById(R.id.voltage);
+        temperature = (TextView) findViewById(R.id.temperature);
 
         registerBatteryLevelReceiver();
     }
@@ -36,14 +42,14 @@ public class BatteryActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             boolean isPresent = intent.getBooleanExtra("present", false);
-            String technology = intent.getStringExtra("technology");
-            int plugged = intent.getIntExtra("plugged", -1);
+            String tech = intent.getStringExtra("technology");
+            int plug = intent.getIntExtra("plugged", -1);
             int scale = intent.getIntExtra("scale", -1);
-            int health = intent.getIntExtra("health", 0);
-            int status = intent.getIntExtra("status", 0);
+            int hea = intent.getIntExtra("health", 0);
+            int sta = intent.getIntExtra("status", 0);
             int rawlevel = intent.getIntExtra("level", -1);
-            int voltage = intent.getIntExtra("voltage", 0);
-            int temperature = intent.getIntExtra("temperature", 0);
+            int volt = intent.getIntExtra("voltage", 0);
+            int temp = intent.getIntExtra("temperature", 0);
             int level = 0;
 
             if (isPresent) {
@@ -51,17 +57,15 @@ public class BatteryActivity extends Activity {
                     level = (rawlevel * 100) / scale;
                 }
 
-                String info = "Battery Level: " + level + "%\n";
-                info += ("Technology: " + technology + "\n");
-                info += ("Plugged: " + getPlugTypeString(plugged) + "\n");
-                info += ("Health: " + getHealthString(health) + "\n");
-                info += ("Status: " + getStatusString(status) + "\n");
-                info += ("Voltage: " + voltage + "\n");
-                info += ("Temperature: " + temperature + "\n");
+                batLevel.setText("" + level + "%");
+                technology.setText(tech);
+                plugged.setText(getPlugTypeString(plug));
+                health.setText(getHealthString(hea));
+                status.setText(getStatusString(sta));
+                voltage.setText("" + volt);
+                temperature.setText("" + temp);
 
-                setBatteryLevelText(info);
             } else {
-                setBatteryLevelText("Battery not present!!!");
             }
         }
     };
@@ -124,10 +128,6 @@ public class BatteryActivity extends Activity {
         }
 
         return statusString;
-    }
-
-    private void setBatteryLevelText(String text) {
-        textBatteryLevel.setText(text);
     }
 
     private void registerBatteryLevelReceiver() {
