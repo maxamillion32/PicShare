@@ -66,6 +66,14 @@ public class PostsAdapter extends ArrayAdapter<Post> {
 
         Post post = getItem(position);
         viewHolder.userName.setText(post.getUserName());
+        prof = (ImageView) convertView.findViewById(R.id.userPic);
+        new LoadImage().execute(post.getUserAvatar());
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         viewHolder.likes.setText(post.getLikes() + " Likes");
         nbrLikes[0] = Integer.parseInt(post.getLikes());
         if (gps.canGetLocation()) {
@@ -98,13 +106,7 @@ public class PostsAdapter extends ArrayAdapter<Post> {
         }
         //
         DownloadImg down = new DownloadImg();
-        prof = (ImageView) convertView.findViewById(R.id.userPic);
-        new LoadImage().execute(post.getUserAvatar());
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
 
         final TweetViewHolder finalViewHolder = viewHolder;
         final TweetViewHolder finalViewHolder1 = viewHolder;
