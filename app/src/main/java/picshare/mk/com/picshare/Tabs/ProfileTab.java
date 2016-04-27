@@ -103,16 +103,18 @@ public class ProfileTab extends AppCompatActivity {
                 if (success == 1) {
                     JSONArray postsData = json.getJSONArray("Photos");
                     posts = postsData.length();
-                    for (int i = 0; i < posts; i++) {
-                        JSONObject postData = postsData.getJSONObject(i);
-                        String image_url = postData.getString("image_url");
-                        String likes = postData.getString("likes");
-                        l += Integer.parseInt(likes);
-                        String title = postData.getString("title");
-                        photoList.add(new Photo(image_url));
+                    if (posts > 0) {
+                        for (int i = 0; i < posts; i++) {
+                            JSONObject postData = postsData.getJSONObject(i);
+                            String image_url = postData.getString("image_url");
+                            String likes = postData.getString("likes");
+                            l += Integer.parseInt(likes);
+                            String title = postData.getString("title");
+                            photoList.add(new Photo(image_url));
+                        }
                     }
-
                     return photoList;
+
                 } else {
                     System.out.println("Failure");
                     return photoList;
