@@ -9,10 +9,12 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import picshare.mk.com.picshare.Utils.EnergyConsumptionUtils;
+
 
 public class BatteryActivity extends Activity {
 
-    TextView batLevel, technology, plugged, health, status, voltage, temperature;
+    TextView batLevel, technology, plugged, health, status, voltage, temperature, cpu, memory;
     String batteryLevelInfo = "Battery Level";
 
     @Override
@@ -27,8 +29,38 @@ public class BatteryActivity extends Activity {
         status = (TextView) findViewById(R.id.status);
         voltage = (TextView) findViewById(R.id.voltage);
         temperature = (TextView) findViewById(R.id.temperature);
+        cpu = (TextView) findViewById(R.id.cpu);
+        memory = (TextView) findViewById(R.id.memory);
 
         registerBatteryLevelReceiver();
+
+        final EnergyConsumptionUtils energyUtils = new EnergyConsumptionUtils(this);
+        //  battery = (TextView) view.findViewById(R.id.battery);
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    while (!isInterrupted()) {
+                        Thread.sleep(1000);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String cpuUse = Float.toString(energyUtils.readUsage());
+                                String memUsage = Long.toString(energyUtils.getMemoryUsage());
+                                String memSize = Long.toString(energyUtils.getUsedMemorySize());
+                                String memUse = memSize + "/" + memUsage;
+                                //   String batLevel = Float.toHexString(energyUtils.getBatteryLevel(getContext()));
+                                cpu.setText(cpuUse + " %");
+                                memory.setText(memUse);
+                                //  battery.setText(batLevel);
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                }
+            }
+        };
+        t.start();
     }
 
     @Override
