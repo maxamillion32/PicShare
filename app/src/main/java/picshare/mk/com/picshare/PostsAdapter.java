@@ -100,6 +100,11 @@ public class PostsAdapter extends ArrayAdapter<Post> {
         DownloadImg down = new DownloadImg();
         prof = (ImageView) convertView.findViewById(R.id.userPic);
         new LoadImage().execute(post.getUserAvatar());
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         final TweetViewHolder finalViewHolder = viewHolder;
         final TweetViewHolder finalViewHolder1 = viewHolder;
@@ -181,7 +186,6 @@ public class PostsAdapter extends ArrayAdapter<Post> {
         }
 
         protected void onPostExecute(Bitmap image) {
-
             if (image != null) {
                 prof.setImageBitmap(image);
             }
