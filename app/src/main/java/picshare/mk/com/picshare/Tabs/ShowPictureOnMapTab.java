@@ -85,7 +85,7 @@ public class ShowPictureOnMapTab extends AppCompatActivity {
                 CameraUpdate center =
                         CameraUpdateFactory.newLatLng(new LatLng(latitude,
                                 longitude));//Centring the map on My Locations
-                CameraUpdate zoom = CameraUpdateFactory.zoomTo(11);
+                CameraUpdate zoom = CameraUpdateFactory.zoomTo(0);
                 googleMap.moveCamera(center);
                 googleMap.animateCamera(zoom);
                 googleMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
@@ -176,8 +176,8 @@ public class ShowPictureOnMapTab extends AppCompatActivity {
                             .title(myPosts.get(i).get("title")).snippet(myPosts.get(i).get("date")));
                     markers.put(marker.getId(), myPosts.get(i).get("image_url"));
                 }
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
-                googleMap.animateCamera(CameraUpdateFactory.zoomTo(8), 2000, null);
+                //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
+                //googleMap.animateCamera(CameraUpdateFactory.zoomTo(8), 2000, null);
             }
         }
     }

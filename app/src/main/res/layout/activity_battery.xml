@@ -23,35 +23,84 @@
         android:textStyle="bold" />
 
 
+    <TableRow
+        android:id="@+id/tableRow"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/user_name"
+        android:layout_marginTop="40dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="40dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp" />
+
+            <TextView
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="19dp"
+                android:layout_marginTop="12dp"
+                android:text="Battery Level: "
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="10pt"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/batteryLevel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="45dp"
+                android:layout_marginTop="12dp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/colorPrimary"
+                android:textSize="10pt"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </TableRow>
+
+
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/wlc"
+        android:layout_below="@+id/tableRow"
         android:layout_marginBottom="10dp"
         android:orientation="horizontal">
 
+        <ImageView
+            android:id="@+id/imageView4"
+            android:layout_width="40dp"
+            android:layout_height="50dp" />
 
         <TextView
-            android:id="@+id/batteryLevelTXT"
-            android:layout_width="wrap_content"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="19dp"
+            android:layout_marginLeft="20dp"
             android:layout_marginTop="12dp"
-            android:text="Battery Level: "
+            android:text="Technology: "
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="10pt"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/batteryLevel"
+            android:id="@+id/technology"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="45dp"
             android:layout_marginTop="12dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/colorPrimary" />
-
+            android:textColor="@color/colorPrimary"
+            android:textSize="10pt"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
@@ -63,26 +112,30 @@
         android:layout_marginBottom="10dp"
         android:orientation="horizontal">
 
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="50dp" />
 
         <TextView
-            android:id="@+id/technologyTXT"
-            android:layout_width="wrap_content"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="19dp"
+            android:layout_marginLeft="20dp"
             android:layout_marginTop="12dp"
-            android:text="Technology: "
+            android:text="Plugged: "
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="10pt"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/technology"
+            android:id="@+id/plugged"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="45dp"
             android:layout_marginTop="12dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/colorPrimary" />
-
+            android:textColor="@color/colorPrimary"
+            android:textSize="10pt"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
@@ -94,28 +147,31 @@
         android:layout_marginBottom="10dp"
         android:orientation="horizontal">
 
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="50dp" />
 
         <TextView
-            android:id="@+id/pluggedTXT"
-            android:layout_width="wrap_content"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="19dp"
+            android:layout_marginLeft="20dp"
             android:layout_marginTop="12dp"
-            android:text="Plugged: "
+            android:text="Health: "
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="10pt"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/plugged"
+            android:id="@+id/health"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="45dp"
             android:layout_marginTop="12dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/colorPrimary" />
-
+            android:textColor="@color/colorPrimary"
+            android:textSize="10pt"
+            android:textStyle="bold" />
     </LinearLayout>
-
 
     <LinearLayout
         android:id="@+id/linearLayout3"
@@ -126,26 +182,30 @@
         android:layout_marginBottom="10dp"
         android:orientation="horizontal">
 
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="50dp" />
 
         <TextView
-            android:id="@+id/healthTXT"
-            android:layout_width="wrap_content"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="19dp"
+            android:layout_marginLeft="20dp"
             android:layout_marginTop="12dp"
-            android:text="Health: "
+            android:text="Status: "
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="10pt"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/health"
+            android:id="@+id/status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="45dp"
             android:layout_marginTop="12dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/colorPrimary" />
-
+            android:textColor="@color/colorPrimary"
+            android:textSize="10pt"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
@@ -157,26 +217,30 @@
         android:layout_marginBottom="10dp"
         android:orientation="horizontal">
 
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="50dp" />
 
         <TextView
-            android:id="@+id/statusTXT"
-            android:layout_width="wrap_content"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="19dp"
+            android:layout_marginLeft="20dp"
             android:layout_marginTop="12dp"
-            android:text="Status: "
+            android:text="Voltage: "
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="10pt"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/status"
+            android:id="@+id/voltage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="45dp"
             android:layout_marginTop="12dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/colorPrimary" />
-
+            android:textColor="@color/colorPrimary"
+            android:textSize="10pt"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
@@ -188,46 +252,18 @@
         android:layout_marginBottom="10dp"
         android:orientation="horizontal">
 
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="50dp" />
 
         <TextView
-            android:id="@+id/voltageTXT"
-            android:layout_width="wrap_content"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="19dp"
-            android:layout_marginTop="12dp"
-            android:text="Voltage: "
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/voltage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="45dp"
-            android:layout_marginTop="12dp"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/colorPrimary" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayout6"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/linearLayout5"
-        android:layout_marginBottom="10dp"
-        android:orientation="horizontal">
-
-
-        <TextView
-            android:id="@+id/temperatureTXT"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="19dp"
+            android:layout_marginLeft="20dp"
             android:layout_marginTop="12dp"
             android:text="Temperature: "
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="10pt"
             android:textStyle="bold" />
 
         <TextView
@@ -237,8 +273,8 @@
             android:layout_marginLeft="45dp"
             android:layout_marginTop="12dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/colorPrimary" />
-
+            android:textColor="@color/colorPrimary"
+            android:textSize="10pt"
+            android:textStyle="bold" />
     </LinearLayout>
-
 </RelativeLayout>

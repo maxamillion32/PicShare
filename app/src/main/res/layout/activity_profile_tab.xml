@@ -1,109 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="picshare.mk.com.picshare.Tabs.ProfileTab">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        tools:context="picshare.mk.com.picshare.Tabs.ProfileTab"
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:layout_width="match_parent"
-            android:layout_height="130dp"
-            android:padding="10dp"
-            >
-            <com.pkmmte.view.CircularImageView
+        android:layout_height="150dp"
+        android:padding="10dp">
 
-                android:layout_width="55dp"
-                android:layout_height="55dp"
-                android:id="@+id/avatar"
-                android:src="@mipmap/logo"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentStart="true"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp" />
+        <com.pkmmte.view.CircularImageView
 
-            <TextView
-                android:id="@+id/pseudo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textStyle="bold|italic"
-                android:textColor="@android:color/black"
-                android:layout_marginLeft="10dp"
-                tools:text="Pseudo"
-                android:layout_alignTop="@+id/avatar"
-                android:layout_toEndOf="@+id/avatar"
-                android:layout_marginTop="10dp" />
+            android:id="@+id/avatar"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:src="@mipmap/logo" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Publications"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:id="@+id/Publications"
-                android:layout_alignTop="@+id/nbP"
-                android:layout_toEndOf="@+id/nbP"
-                android:layout_marginLeft="10dp" />
+        <TextView
+            android:id="@+id/pseudo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/avatar"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_toEndOf="@+id/avatar"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@android:color/black"
+            android:textStyle="bold|italic"
+            tools:text="Pseudo" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Likes"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:id="@+id/Likes"
-                android:layout_alignTop="@+id/nbL"
-                android:layout_toEndOf="@+id/nbL"
-                android:layout_marginLeft="10dp" />
+        <TextView
+            android:id="@+id/Publications"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/nbP"
+            android:layout_marginLeft="10dp"
+            android:layout_toEndOf="@+id/nbP"
+            android:text="Publications"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="0"
-                android:id="@+id/nbP"
-                android:layout_below="@+id/avatar"
-                android:layout_alignStart="@+id/avatar"
-                android:layout_marginTop="22dp" />
+        <TextView
+            android:id="@+id/Likes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/nbL"
+            android:layout_marginLeft="10dp"
+            android:layout_toEndOf="@+id/nbL"
+            android:text="Likes"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
+        <TextView
+            android:id="@+id/nbP"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/avatar"
+            android:layout_below="@+id/avatar"
+            android:layout_marginTop="22dp"
+            android:text="0"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-                android:text="0"
-                android:id="@+id/nbL"
-                android:layout_marginLeft="50dp"
-                android:layout_alignTop="@+id/Publications"
-                android:layout_toEndOf="@+id/Publications" />
+        <TextView
+            android:id="@+id/nbL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
 
-            <Button
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:id="@+id/exitButton"
-                android:background="@drawable/direction"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentTop="true" />
-        </RelativeLayout>
+            android:layout_alignTop="@+id/Publications"
+            android:layout_marginLeft="50dp"
+            android:layout_toEndOf="@+id/Publications"
+            android:text="0"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="1px"
-            android:background="#FF909090"
-            android:layout_marginLeft="25dp"
-            android:layout_marginRight="25dp"
-            android:layout_marginTop="15dp" />
+        <Button
+            android:id="@+id/exitButton"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/direction" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="1px"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="15dp"
+        android:background="#FF909090" />
 
 
-        <GridView
-            android:id="@+id/gridViewPhoto"
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
-            android:columnWidth="90dp"
-            android:numColumns="auto_fit"
-            android:verticalSpacing="0dp"
-            android:horizontalSpacing="5dp"
-            android:stretchMode="columnWidth"
-            android:gravity="center" />
+    <GridView
+        android:id="@+id/gridViewPhoto"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:columnWidth="110dp"
+        android:gravity="center"
+        android:horizontalSpacing="5dp"
+        android:numColumns="auto_fit"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="0dp" />
 
-    </LinearLayout>
+</LinearLayout>
