@@ -1,8 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-    android:id="@+id/action_settings"
-    android:orderInCategory="100"
-    android:title="Energy Controle"
-    app:showAsAction="never" />
+        android:id="@+id/action_energy"
+        android:title="Energy Consumption"
+        app:showAsAction="always" />
 </menu>

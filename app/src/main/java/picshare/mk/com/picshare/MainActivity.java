@@ -1,20 +1,18 @@
 package picshare.mk.com.picshare;
 
 import android.app.TabActivity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TabHost;
-import android.widget.Toast;
 
 import picshare.mk.com.picshare.Tabs.HomeTab;
 import picshare.mk.com.picshare.Tabs.PictureTab;
@@ -27,6 +25,7 @@ public class MainActivity extends TabActivity implements SensorEventListener {
     private long lastUpdate;
     private boolean move = false;
     private TabHost tabHost;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,8 +35,8 @@ public class MainActivity extends TabActivity implements SensorEventListener {
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         lastUpdate = System.currentTimeMillis();
     }
-    private void setTabs()
-    {
+
+    private void setTabs() {
 
         addTab("Home", R.drawable.home, new Intent().setClass(this, HomeTab.class));
         addTab("Search ", R.drawable.search, new Intent().setClass(this, SearchTab.class));
@@ -47,8 +46,8 @@ public class MainActivity extends TabActivity implements SensorEventListener {
 
 
     }
-    private void addTab(String labelId, int drawableId, Intent intent2)
-    {
+
+    private void addTab(String labelId, int drawableId, Intent intent2) {
         tabHost = getTabHost();
         Intent intent = new Intent(intent2);
         TabHost.TabSpec spec = tabHost.newTabSpec(labelId);
@@ -61,18 +60,27 @@ public class MainActivity extends TabActivity implements SensorEventListener {
         spec.setContent(intent);
         tabHost.addTab(spec);
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_settings:
-                // User chose the "Settings" item, show the app settings UI...
-                return true;
-                default:
+            case R.id.action_energy:
+                Intent intent = new Intent(this, BatteryActivity.class);
+                this.startActivity(intent);
+                break;
+            default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
-
         }
+        return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
     }
 
     @Override
@@ -86,6 +94,7 @@ public class MainActivity extends TabActivity implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
+
     private void getAccelerometer(SensorEvent event) {
         float[] values = event.values;
         // Movement
@@ -104,19 +113,20 @@ public class MainActivity extends TabActivity implements SensorEventListener {
             lastUpdate = actualTime;
 
             if (move) {// SHake the Phone Two times
-                 int currentTab =tabHost.getCurrentTab();
-                if(currentTab>=0 && currentTab<4){
-                    tabHost.setCurrentTab(currentTab+1);
-                }else{
-                    if(currentTab==4){
+                int currentTab = tabHost.getCurrentTab();
+                if (currentTab >= 0 && currentTab < 4) {
+                    tabHost.setCurrentTab(currentTab + 1);
+                } else {
+                    if (currentTab == 4) {
                         tabHost.setCurrentTab(0);
                     }
                 }
 
             }
-            move=!move;
+            move = !move;
         }
     }
+
     @Override
     protected void onResume() {
         super.onResume();
