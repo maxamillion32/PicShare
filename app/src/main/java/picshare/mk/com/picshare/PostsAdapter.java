@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,13 +22,19 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONObject;
+
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import picshare.mk.com.picshare.Utils.AppUtils;
 import picshare.mk.com.picshare.Utils.DownloadImg;
+import picshare.mk.com.picshare.Utils.JSONParser;
 import picshare.mk.com.picshare.Utils.MyGpsLocationListener;
 
 /**
@@ -64,7 +71,7 @@ public class PostsAdapter extends ArrayAdapter<Post> {
         }
         gps = new MyGpsLocationListener(getContext());
 
-        Post post = getItem(position);
+        final Post post = getItem(position);
         viewHolder.userName.setText(post.getUserName());
         prof = (ImageView) convertView.findViewById(R.id.userPic);
         new LoadImage().execute(post.getUserAvatar());
@@ -117,12 +124,16 @@ public class PostsAdapter extends ArrayAdapter<Post> {
                 if (finalViewHolder.likesIcon.getDrawable().getConstantState() == getContext().getResources().getDrawable(R.drawable.heart_empty).getConstantState()) {
                     finalViewHolder.likesIcon.setImageResource(R.drawable.heart_full);
                     nbrLikes[0]++;
+                    //System.out.println(post.getId());
+                    new LikeTask(post.getId(), nbrLikes[0]).execute();
                     finalViewHolder1.likes.setText(nbrLikes[0] + " Likes");
                     //TODO Save the number of likes and the post id in localStorage to update the data base when the user closes the app.
 
                 } else {
                     finalViewHolder.likesIcon.setImageResource(R.drawable.heart_empty);
                     nbrLikes[0]--;
+                    //System.out.println(post.getId());
+                    new LikeTask(post.getId(), nbrLikes[0]).execute();
                     finalViewHolder1.likes.setText(nbrLikes[0] + " Likes");
                     //TODO Save the number of likes and the post id in localStorage to update the data base when the user closes the app.
 
@@ -191,6 +202,42 @@ public class PostsAdapter extends ArrayAdapter<Post> {
             if (image != null) {
                 prof.setImageBitmap(image);
             }
+        }
+    }
+
+    public class LikeTask extends AsyncTask<String, String, String> {
+
+        int nbLike;
+        String id;
+
+        public LikeTask(String id, int nbLike) {
+            this.id = id;
+            this.nbLike = nbLike;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            // TODO Auto-generated method stub
+
+            ArrayList<NameValuePair> parames = new ArrayList<NameValuePair>();
+            parames.add(new BasicNameValuePair("id", id));
+            parames.add(new BasicNameValuePair("nbLike", Integer.toString(nbLike)));
+            JSONParser jParser = new JSONParser();
+            JSONObject json = jParser.makeHttpRequest("http://picshare-android.esy.es/ws/Like.php", "GET", parames);
+
+            Log.i("response http", json.toString());
+
+            return "success";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
         }
     }
 }
